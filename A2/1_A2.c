@@ -54,19 +54,19 @@ int main()
         }
         else if (token == SINGLE_LINE_COMMENT_START) 
         {
-            printf("<SINGLE_LINE_COMMENT_START, %s>\n", yytext);
+            // printf("<SINGLE_LINE_COMMENT_START, %s>\n", yytext);
         }
         else if (token == SINGLE_LINE_COMMENT_END) 
         {
-            printf("<SINGLE_LINE_COMMENT_END, \"\\n\">\n");
+            // printf("<SINGLE_LINE_COMMENT_END, \"\\n\">\n");
         }
         else if (token == MULTI_LINE_COMMENT_START) 
         {
-            printf("<MULTI_LINE_COMMENT_START, %s>\n", yytext);
+            // printf("<MULTI_LINE_COMMENT_START, %s>\n", yytext);
         }
         else if (token == MULTI_LINE_COMMENT_END) 
         {
-            printf("<MULTI_LINE_COMMENT_END, %s>\n", yytext);
+            // printf("<MULTI_LINE_COMMENT_END, %s>\n", yytext);
         }
         else 
         {
