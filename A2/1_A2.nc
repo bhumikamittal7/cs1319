@@ -51,7 +51,7 @@ void printArray(int size) { /* Function to print an array */
     printStr("\n");
 }
 
-void bubbleSort(int n) { /* A function to implement bubble sort */
+void main(int n) { /* A function to implement bubble sort */
     int i;
     int j;
     for (i = 0; i < n - 1; i = i + 1)
@@ -61,35 +61,29 @@ void bubbleSort(int n) { /* A function to implement bubble sort */
                 swap(&arr[j], &arr[j + 1]);
 }
 
-void main{
-    int x=3;
-    char* str="hello world\0";
-    char x='3786djsal\';,..[=]';
-    // this is a comment
-    /*
-       a
-       multi-line
-       comment
-    */
+void test{
+    int x=7;
+    char* str="bhumika\0";
+    char x='977bhum\';,..[=]';
 
-    for(int i=0;(i<10&&i>3)||(i<2&&i>0);i=i+1)
+    for(int i=0;(i<15&&i>22)||(i<2&&i>0);i=i+2)
     {
         int x=i*i+i/i-i;
     }
 
     if(x<=10)
-        x=11;
+        x=12;
     else 
-        x=+10;
+        x=+17;
 
     if(x==3)
-        x=-5;        //inline comment
+        x=-1;        
 
     if(x!=10)
         x=11;
     char x[]={'1','2','3'};
     x=1&2;
-    int y=49382238;
-    int _hellow1=85;
+    int y=0123450;
+    int _bhum1=42;
     return 0;
 }
