@@ -1,7 +1,7 @@
 output: a.out 1_A2.nc
 		./a.out < 1_A2.nc > 1_A2.txt
 
-a.out:  lex.yy.c 1_A2.c
+a.out:  lex.yy.c
 		cc lex.yy.c 1_A2.c -lfl
 
 lex.yy.c: 1_A2.l

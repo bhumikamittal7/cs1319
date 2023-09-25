@@ -27,7 +27,7 @@ C_CHAR_SEQUENCE         {C_CHAR}+
 CHARACTER_CONSTANT      \'({C_CHAR_SEQUENCE})\'
 Constants               {INTEGER_CONSTANT}|{CHARACTER_CONSTANT}
 S_CHAR                  [^\"\\\n]|{ESCAPE_SEQUENCE}
-S_CHAR_SEQUENCE         {S_CHAR}+\\0
+S_CHAR_SEQUENCE         {S_CHAR}+
 STRING_LITERAL          \"({S_CHAR_SEQUENCE})\"
 PUNCTUATOR              "["|"]"|"("|")"|"{"|"}"|"->"|"&"|"*"|"+"|"-"|"/"|"%"|"!"|"?"|"<"|">"|"<="|">="|"=="|"!="|"&&"|"||"|"="|":"|";"|","
 WHITESPACE              [ \t\n]
@@ -37,10 +37,10 @@ WHITESPACE              [ \t\n]
 %%
 
 {KEYWORD}                       {return KEYWORD;}
+{STRING_LITERAL}                {return STRING_LITERAL;}
 {IDENTIFIER}                    {return IDENTIFIER;}
 {INTEGER_CONSTANT}              {return INTEGER_CONSTANT;}
 {CHARACTER_CONSTANT}            {return CHAR_CONSTANT;}
-{STRING_LITERAL}                {return STRING_LITERAL;}
 {PUNCTUATOR}                    {return PUNCTUATOR;}
 {WHITESPACE}                    {/*ignore whitespace and newlines*/}
 "//"                            {BEGIN(SINGLE_LINE_COMMENT);return SINGLE_LINE_COMMENT_START;}
