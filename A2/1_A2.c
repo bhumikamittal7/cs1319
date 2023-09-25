@@ -13,6 +13,13 @@
 extern char* yytext;
 extern int yylex();
 
+void printStuff(char* type) {
+    for (int i = 0; yytext[i] != '\0'; i++) {
+        printf("%c", yytext[i]);
+    }
+    printf(">\n");
+}
+
 int main() 
 {
     int token;
@@ -28,45 +35,25 @@ int main()
         }
         else if (token == INTEGER_CONSTANT) 
         {
-            printf("<INTEGER_CONSTANT, %s>\n", yytext);
+            printf("<CONSTANT, %s>\n", yytext);
         }
         else if (token == CHAR_CONSTANT) 
         {
-            printf("<CHAR CONSTANT, ");
-            for (int i = 1; yytext[i+1] != '\0'; i++)
-            {
-                printf("%c", yytext[i]);
-            }
-            printf(">\n");
+            printf("<CONSTANT, ");
+            printStuff(yytext);
         }
         else if (token == STRING_LITERAL) 
         {
             printf("<STRING_LITERAL, ");
-            for (int i = 1; yytext[i+1] != '\0'; i++)
-            {
-                printf("%c", yytext[i]);
-            }
-            printf(">\n");
+            printStuff(yytext);
         }
         else if (token == PUNCTUATOR) 
         {
             printf("<PUNCTUATOR, %s>\n", yytext);
         }
-        else if (token == SINGLE_LINE_COMMENT_START) 
+        else if ((token == SINGLE_LINE_COMMENT_START) ||  (token == SINGLE_LINE_COMMENT_END) ||(token == MULTI_LINE_COMMENT_START) || (token == MULTI_LINE_COMMENT_END) )
         {
-            // printf("<SINGLE_LINE_COMMENT_START, %s>\n", yytext);
-        }
-        else if (token == SINGLE_LINE_COMMENT_END) 
-        {
-            // printf("<SINGLE_LINE_COMMENT_END, \"\\n\">\n");
-        }
-        else if (token == MULTI_LINE_COMMENT_START) 
-        {
-            // printf("<MULTI_LINE_COMMENT_START, %s>\n", yytext);
-        }
-        else if (token == MULTI_LINE_COMMENT_END) 
-        {
-            // printf("<MULTI_LINE_COMMENT_END, %s>\n", yytext);
+            // do nothing
         }
         else 
         {
