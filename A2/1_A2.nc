@@ -13,6 +13,31 @@ void bubbleSort(int n);
 
 int arr[20]; // Global array
 
+//random test stuff - this is a garbage function
+void testStuff1{
+    char x[]={'1','2','3'};
+    x=1&2;
+    int y=0123450;
+    int _bhum1=42;
+    int x=7;
+    char* str="bhumika";
+    char x='420blahblah\';,..[=]';
+
+    for(int i=0;(i<15&&i>22)||(i<2&&i>0);i=i++)
+    {
+        int x=i*i+i/i-i;
+    }
+    if(x<=10)
+        x=12;
+    else 
+        x+=17;
+    if(x==3)
+        x->1;        
+    if(x!=10)
+        x=11;
+
+}
+
 // Driver program to test above functions
 int main() {
     int n;
@@ -59,31 +84,4 @@ void main(int n) { /* A function to implement bubble sort */
         for (j = 0; j < n - i - 1; j = j + 1)
             if (arr[j] > arr[j + 1])
                 swap(&arr[j], &arr[j + 1]);
-}
-
-void test{
-    int x=7;
-    char* str="bhumika\0";
-    char x='977bhum\';,..[=]';
-
-    for(int i=0;(i<15&&i>22)||(i<2&&i>0);i=i+2)
-    {
-        int x=i*i+i/i-i;
-    }
-
-    if(x<=10)
-        x=12;
-    else 
-        x=+17;
-
-    if(x==3)
-        x=-1;        
-
-    if(x!=10)
-        x=11;
-    char x[]={'1','2','3'};
-    x=1&2;
-    int y=0123450;
-    int _bhum1=42;
-    return 0;
 }
