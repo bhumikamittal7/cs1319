@@ -1,11 +1,15 @@
-output: a.out 1_A2.nc
-		./a.out < 1_A2.nc > 1_A2.txt
+.PHONY: build clean
 
-a.out:  lex.yy.c
-		cc lex.yy.c 1_A2.c -lfl
+output: lexer 1_A2.nc
+		./lexer < 1_A2.nc > 1_A2.txt
+
+lexer: lex.yy.c 1_A2.c
+		cc lex.yy.c 1_A2.c -o lexer -lfl
 
 lex.yy.c: 1_A2.l
 		flex 1_A2.l
 
+build: clean lexer
+
 clean:
-	rm a.out lex.yy.c 1_A2.txt
+		rm -f lexer lex.yy.c 1_A2.txt
