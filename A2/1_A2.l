@@ -10,6 +10,7 @@
     #define SINGLE_LINE_COMMENT_END     9
     #define MULTI_LINE_COMMENT_START    10
     #define MULTI_LINE_COMMENT_END      11
+    #define INVALID_TOKEN               12
 %}
 
 
@@ -33,6 +34,7 @@ PUNCTUATOR              "["|"]"|"("|")"|"{"|"}"|"->"|"&"|"*"|"+"|"-"|"/"|"%"|"!"
 WHITESPACE              [ \t\n]
 %x MULTI_LINE_COMMENT
 %x SINGLE_LINE_COMMENT
+INVALID_TOKEN           .
 
 %%
 
@@ -51,5 +53,6 @@ WHITESPACE              [ \t\n]
 <MULTI_LINE_COMMENT>"*/"        {BEGIN(INITIAL); return MULTI_LINE_COMMENT_END;}
 <MULTI_LINE_COMMENT>.           {/*ignore*/}
 <MULTI_LINE_COMMENT>\n          {/*ignore*/}
+{INVALID_TOKEN}                 {return INVALID_TOKEN;}
 
 %%

@@ -9,6 +9,7 @@
 #define SINGLE_LINE_COMMENT_END     9
 #define MULTI_LINE_COMMENT_START    10
 #define MULTI_LINE_COMMENT_END      11
+#define INVALID_TOKEN               12
 
 extern char* yytext;
 extern int yylex();
@@ -58,6 +59,7 @@ int main()
         else 
         {
             printf("<INVALID_TOKEN, %s>\n", yytext);
+            return *yytext;
         }
     }
     return 0;
