@@ -3,7 +3,7 @@
 output: lexer 1_A2.nc
 		./lexer < 1_A2.nc > 1_A2.txt
 
-lexer: lex.yy.c 1_A2.c
+lexer: lex.yy.c
 		cc lex.yy.c 1_A2.c -o lexer -lfl
 
 lex.yy.c: 1_A2.l
