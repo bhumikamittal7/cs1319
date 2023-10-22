@@ -1,4 +1,5 @@
 // Forward declarations
+char str1 = "";
 void swap(int *p, int *q);
 void readArray(int size);
 void printArray(int size);
