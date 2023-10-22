@@ -10,10 +10,10 @@ lexer: lex.yy.c
 			bison -d 1_A3.y
 
 lex.yy.c: 1_A3.l
-		flex 1_A3.l
+		flex -o lex.yy.c 1_A3.l
 
 parser: 1_A3.tab.c lex.yy.c
-		gcc -o parser lex.yy.c 1_A3.tab.c 1_A3.c -lfl
+		gcc -o parser lex.yy.c 1_A3.tab.c 1_A3.c -lfl -Werror
 
 build: clean parser
 

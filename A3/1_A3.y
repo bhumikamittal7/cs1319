@@ -6,10 +6,10 @@
 #include <stdio.h>
 extern int yylex();
 
-void yyerror(char *s);
+void yyerror(const char *);
 
 %}
-
+%define parse.error verbose
 %token IDENTIFIER CONSTANT STRING_LITERAL PUNCTUATOR KEYWORD
 
 %start translation-unit
@@ -188,7 +188,7 @@ function-definition: type-specifier declarator compound-statement
 
 //c code
 
-void yyerror(char *s) {
+void yyerror(const char *s) {
     fprintf(stderr, "%s\n", s);
     exit(EXIT_FAILURE);
 }

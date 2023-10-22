@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "1_A3.tab.h"
 
 extern int yylex();
 extern void yyerror(char *s);
@@ -70,7 +71,9 @@ int lexer(){
 
 int main() 
 {
-    lexer();
+    // printf("welcome to the lexer\n");
+    // lexer();
+    // printf("lex done\n");
     yyparse();
 
     return 0;
