@@ -1,5 +1,10 @@
 #include <stdio.h>
-#include "1_A3.tab.h"
+#include <string.h>
+#include <stdlib.h>
+
+extern int yylex();
+extern void yyerror(char *s);
+extern char* yytext;
 
 #define KEYWORD                     2
 #define IDENTIFIER                  3
@@ -13,17 +18,12 @@
 #define MULTI_LINE_COMMENT_END      11
 #define INVALID_TOKEN               12
 
-extern char* yytext;
-extern int yylex();
-
 void printStuff(char* type) {
     for (int i = 0; yytext[i] != '\0'; i++) {
         printf("%c", yytext[i]);
     }
     printf(">\n");
 }
-
-// just keeping it here for now
 
 int lexer(){
     int token;
@@ -70,9 +70,7 @@ int lexer(){
 
 int main() 
 {
-    // we need to parse the 1.A3.c file - but we will do that in makefile
-    // do we need to call lexer() here? or just call yyparse()?
-    // lexer();
+    lexer();
     yyparse();
 
     return 0;

@@ -2,23 +2,25 @@
 
 %{ 
 #include <string.h>
-#include <iostream>
 #include <stdlib.h>
+#include <stdio.h>
 extern int yylex();
 
 void yyerror(char *s);
 
 %}
 
-%token KEYWORD IDENTIFIER CONSTANT STRING-LITERAL PUNCTUATOR
+%token IDENTIFIER CONSTANT STRING_LITERAL PUNCTUATOR KEYWORD
 
 %start translation-unit
 
+%%
+
 /* 1. Expressions */
 
-primary-expression: IDENTIFIER
+primary-expression : IDENTIFIER
                     | CONSTANT
-                    | STRING-LITERAL
+                    | STRING_LITERAL
                     | '(' expression ')'
                     ;
 
@@ -29,7 +31,7 @@ argument-expression-list-opt: argument-expression-list
 postfix-expression: primary-expression
                     | postfix-expression '[' expression ']'
                     | postfix-expression '(' argument-expression-list-opt ')'
-                    | postfix-expression '->' IDENTIFIER /* pointer indirection only one level */
+                    | postfix-expression "->" IDENTIFIER /* pointer indirection only one level */
                     ;
 
 argument-expression-list: assignment-expression
@@ -58,21 +60,21 @@ additive-expression: multiplicative-expression  /* these are left associative */
 relational-expression: additive-expression      /* these are left associative */
                         | relational-expression '<' additive-expression
                         | relational-expression '>' additive-expression
-                        | relational-expression '<=' additive-expression
-                        | relational-expression '>=' additive-expression
+                        | relational-expression "<=" additive-expression
+                        | relational-expression ">=" additive-expression
                         ;
 
 equality-expression: relational-expression      /* these are left associative */
-                    | equality-expression '==' relational-expression
-                    | equality-expression '!=' relational-expression
+                    | equality-expression "==" relational-expression
+                    | equality-expression "!=" relational-expression
                     ;
 
 logical-AND-expression: equality-expression     /* these are left associative */
-                        | logical-AND-expression '&&' equality-expression
+                        | logical-AND-expression "&&" equality-expression
                         ;
 
 logical-OR-expression: logical-AND-expression   /* these are left associative */
-                        | logical-OR-expression '||' logical-AND-expression
+                        | logical-OR-expression "||" logical-AND-expression
                         ;
 
 conditional-expression: logical-OR-expression   /* these are right associative */
@@ -95,9 +97,9 @@ init-declarator: declarator
                 | declarator '=' initializer
                 ;
 
-type-specifier: 'void'
-                | 'char'
-                | 'int'
+type-specifier: "void"
+                | "char"
+                | "int"
                 ;
 
 pointer-opt: pointer
@@ -112,7 +114,7 @@ parameter-list-opt: parameter-list
                     ;
 
 direct-declarator: IDENTIFIER
-                    | IDENTIFIER '[' integer-constant ']'   /* check here again */
+                    | IDENTIFIER '[' CONSTANT ']'   /* check here again */
                     | IDENTIFIER '(' parameter-list-opt ')'
                     ;
 
@@ -163,14 +165,14 @@ expression-opt: expression
 expression-statement: expression-opt ';'
                     ;
 
-selection-statement: 'if' '(' expression ')' statement
-                    | 'if' '(' expression ')' statement 'else' statement
+selection-statement: "if" '(' expression ')' statement
+                    | "if" '(' expression ')' statement "else" statement
                     ;
 
-iteration-statement: 'for' '(' expression-opt ';' expression-opt ';' expression-opt ')' statement
+iteration-statement: "for" '(' expression-opt ';' expression-opt ';' expression-opt ')' statement
                     ;
 
-jump-statement: 'return' expression-opt ';'
+jump-statement: "return" expression-opt ';'
                 ;
 
 /* 4. Translation Unit */
@@ -188,5 +190,5 @@ function-definition: type-specifier declarator compound-statement
 
 void yyerror(char *s) {
     fprintf(stderr, "%s\n", s);
-    EXIT_FAILURE;
+    exit(EXIT_FAILURE);
 }
