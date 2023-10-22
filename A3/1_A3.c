@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include "1_A3.tab.h"
+
 #define KEYWORD                     2
 #define IDENTIFIER                  3
 #define INTEGER_CONSTANT            4
@@ -21,8 +23,9 @@ void printStuff(char* type) {
     printf(">\n");
 }
 
-int main() 
-{
+// just keeping it here for now
+
+int lexer(){
     int token;
     while ((token = yylex())) 
     {
@@ -45,7 +48,7 @@ int main()
         }
         else if (token == STRING_LITERAL) 
         {
-            printf("<STRING_LITERAL, ");
+            printf("<STRING-LITERAL, ");
             printStuff(yytext);
         }
         else if (token == PUNCTUATOR) 
@@ -62,5 +65,15 @@ int main()
             return *yytext;
         }
     }
+    return 0;
+}
+
+int main() 
+{
+    // we need to parse the 1.A3.c file - but we will do that in makefile
+    // do we need to call lexer() here? or just call yyparse()?
+    // lexer();
+    yyparse();
+
     return 0;
 }

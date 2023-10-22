@@ -1,5 +1,7 @@
 %{
     #include<stdio.h>
+    #include "1_A3.tab.h"
+    
     #define KEYWORD                     2
     #define IDENTIFIER                  3
     #define INTEGER_CONSTANT            4

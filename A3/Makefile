@@ -1,15 +1,21 @@
 .PHONY: build clean
 
-output: lexer 1_A3.nc
-		./lexer < 1_A3.nc > 1_A3.txt
+output: parser 1_A3.nc
+		./parser < 1_A3.nc > 1_A3.txt
 
 lexer: lex.yy.c
 		gcc lex.yy.c 1_A3.c -o lexer -lfl -Werror
 
+parser: 1_A3.tab.c
+		gcc -o parser lex.yy.c 1_A3.tab.c 1_A3.c -lfl -Werror
+
+1_A3.tab.c: 1_A3.y
+			bison -d 1_A3.y
+
 lex.yy.c: 1_A3.l
 		flex 1_A3.l
 
-build: clean lexer
+build: clean parser
 
 clean:
-		rm -f lexer lex.yy.c 1_A3.txt
+		rm -f parser lex.yy.c 1_A3.tab.c 1_A3.txt
