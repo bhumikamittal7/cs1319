@@ -39,7 +39,8 @@ WHITESPACE              [ \t\n]
 INVALID_TOKEN           .
 
 %%
-
+"char"                          {return CHAR;}
+"else"                          {return ELSE;}
 {KEYWORD}                       {return KEYWORD;}
 {STRING_LITERAL}                {return STRING_LITERAL;}
 {IDENTIFIER}                    {return IDENTIFIER;}

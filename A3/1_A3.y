@@ -9,6 +9,7 @@ extern int yylex();
 void yyerror(const char *);
 
 %}
+
 %define parse.error verbose
 %token IDENTIFIER CONSTANT STRING_LITERAL PUNCTUATOR KEYWORD
 
@@ -25,7 +26,7 @@ primary-expression : IDENTIFIER
                     ;
 
 argument-expression-list-opt: argument-expression-list
-                            | /* epsilon */
+                            | %empty
                             ;
 
 postfix-expression: primary-expression
@@ -103,14 +104,14 @@ type-specifier: "void"
                 ;
 
 pointer-opt: pointer
-            | /* epsilon */
+            | %empty
             ;
 
 declarator: pointer-opt direct-declarator
             ;
 
 parameter-list-opt: parameter-list
-                    | /* epsilon */
+                    | %empty
                     ;
 
 direct-declarator: IDENTIFIER
@@ -125,7 +126,7 @@ parameter-list: parameter-declaration
                 ;
 
 identifier-opt: IDENTIFIER
-                | /* epsilon */
+                | %empty
                 ;
 
 parameter-declaration: type-specifier pointer-opt identifier-opt
@@ -144,7 +145,7 @@ statement: compound-statement
             ;
 
 block-item-list-opt: block-item-list
-                    | /* epsilon */
+                    | %empty
                     ;
 
 compound-statement: '{' block-item-list-opt '}'
@@ -159,7 +160,7 @@ block-item: declaration
             ;
 
 expression-opt: expression
-                | /* epsilon */
+                | %empty
                 ;
 
 expression-statement: expression-opt ';'

@@ -1,0 +1,18 @@
+
+{KEYWORD}                       {printf("<KEYWORD, %s>\n", yytext);}
+{STRING_LITERAL}                {printf("<STRING_LITERAL, "); for (int i = 0; yytext[i] != '\0'; i++) {printf("%c", yytext[i]);}printf(">\n");}
+{IDENTIFIER}                    {printf("<IDENTIFIER, %s>\n", yytext);}
+{INTEGER_CONSTANT}              {printf("<CONSTANT, %s>\n", yytext);}
+{CHARACTER_CONSTANT}            { printf("<CONSTANT, ");for (int i = 0; yytext[i] != '\0'; i++) {printf("%c", yytext[i]);}printf(">\n");}
+{PUNCTUATOR}                    {printf("<PUNCTUATOR, %s>\n", yytext);}
+{WHITESPACE}                    {/*ignore*/}
+"//"                            {BEGIN(SINGLE_LINE_COMMENT);/*ignore*/}
+<SINGLE_LINE_COMMENT>.          {/*ignore*/}
+<SINGLE_LINE_COMMENT>\n         {BEGIN(INITIAL); /*ignore*/}
+<SINGLE_LINE_COMMENT><<EOF>>    {BEGIN(INITIAL);/*ignore*/}
+"/*"                            {BEGIN(MULTI_LINE_COMMENT); /*ignore*/}
+<MULTI_LINE_COMMENT>"*/"        {BEGIN(INITIAL); /*ignore*/}
+<MULTI_LINE_COMMENT>.           {/*ignore*/}
+<MULTI_LINE_COMMENT>\n          {/*ignore*/}
+{INVALID_TOKEN}                 {printf("<INVALID_TOKEN, %s>\n", yytext); return *yytext;}
+
