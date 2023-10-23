@@ -9,180 +9,185 @@ extern int yylex();
 void yyerror(const char *);
 
 %}
-
 %define parse.error verbose
-%token IDENTIFIER CONSTANT STRING_LITERAL PUNCTUATOR KEYWORD
+%token VOID CHAR INT IF ELSE FOR RETURN 
+%token IDENTIFIER INTEGER_CONSTANT CHARACTER_CONSTANT STRING_LITERAL 
+%token L_SQUARE_BRACKET R_SQUARE_BRACKET L_ROUND_BRACKET R_ROUND_BRACKET L_CURLY_BRACKET R_CURLY_BRACKET 
+%token ARROW AMPERSAND ASTERISK PLUS MINUS DIVIDE MODULO NOT QUESTION 
+%token LESS_THAN GREATER_THAN LESS_THAN_EQUAL_TO GREATER_THAN_EQUAL_TO EQUAL_TO NOT_EQUAL_TO 
+%token LOGICAL_AND LOGICAL_OR ASSIGN COLON SEMICOLON COMMA INVALID_TOKEN
 
-%start translation-unit
+%start translation_unit
 
 %%
 
 /* 1. Expressions */
 
-primary-expression : IDENTIFIER
-                    | CONSTANT
+primary_expression : IDENTIFIER
+                    | INTEGER_CONSTANT
+                    | CHARACTER_CONSTANT
                     | STRING_LITERAL
                     | '(' expression ')'
                     ;
 
-argument-expression-list-opt: argument-expression-list
+argument_expression_list_opt: argument_expression_list
                             | %empty
                             ;
 
-postfix-expression: primary-expression
-                    | postfix-expression '[' expression ']'
-                    | postfix-expression '(' argument-expression-list-opt ')'
-                    | postfix-expression "->" IDENTIFIER /* pointer indirection only one level */
+postfix_expression: primary_expression
+                    | postfix_expression '[' expression ']'
+                    | postfix_expression '(' argument_expression_list_opt ')'
+                    | postfix_expression "->" IDENTIFIER /* pointer indirection only one level */
                     ;
 
-argument-expression-list: assignment-expression
-                        | argument-expression-list ',' assignment-expression
+argument_expression_list: assignment_expression
+                        | argument_expression_list ',' assignment_expression
                         ;
 
-unary-expression: postfix-expression
-                | unary-operator unary-expression   /* this is done to make it non associative, use unary-operator unary-expression */
+unary_expression: postfix_expression
+                | unary_operator unary_expression   /* this is done to make it non associative, use unary_operator unary_expression */
                 /* only a single prefix op is allowed - check here again */
                 ;
 
-unary-operator: '&' | '*' | '+' | '-' | '!'
+unary_operator: '&' | '*' | '+' | '_' | '!'
                 ;
 
-multiplicative-expression: unary-expression     /* these are left associative */
-                            | multiplicative-expression '*' unary-expression
-                            | multiplicative-expression '/' unary-expression
-                            | multiplicative-expression '%' unary-expression
+multiplicative_expression: unary_expression     /* these are left associative */
+                            | multiplicative_expression '*' unary_expression
+                            | multiplicative_expression '/' unary_expression
+                            | multiplicative_expression '%' unary_expression
                             ;
 
-additive-expression: multiplicative-expression  /* these are left associative */
-                    | additive-expression '+' multiplicative-expression
-                    | additive-expression '-' multiplicative-expression
+additive_expression: multiplicative_expression  /* these are left associative */
+                    | additive_expression '+' multiplicative_expression
+                    | additive_expression '_' multiplicative_expression
                     ;
 
-relational-expression: additive-expression      /* these are left associative */
-                        | relational-expression '<' additive-expression
-                        | relational-expression '>' additive-expression
-                        | relational-expression "<=" additive-expression
-                        | relational-expression ">=" additive-expression
+relational_expression: additive_expression      /* these are left associative */
+                        | relational_expression '<' additive_expression
+                        | relational_expression '>' additive_expression
+                        | relational_expression "<=" additive_expression
+                        | relational_expression ">=" additive_expression
                         ;
 
-equality-expression: relational-expression      /* these are left associative */
-                    | equality-expression "==" relational-expression
-                    | equality-expression "!=" relational-expression
+equality_expression: relational_expression      /* these are left associative */
+                    | equality_expression "==" relational_expression
+                    | equality_expression "!=" relational_expression
                     ;
 
-logical-AND-expression: equality-expression     /* these are left associative */
-                        | logical-AND-expression "&&" equality-expression
+logical_AND_expression: equality_expression     /* these are left associative */
+                        | logical_AND_expression "&&" equality_expression
                         ;
 
-logical-OR-expression: logical-AND-expression   /* these are left associative */
-                        | logical-OR-expression "||" logical-AND-expression
+logical_OR_expression: logical_AND_expression   /* these are left associative */
+                        | logical_OR_expression "||" logical_AND_expression
                         ;
 
-conditional-expression: logical-OR-expression   /* these are right associative */
-                        | logical-OR-expression '?' expression ':' conditional-expression
+conditional_expression: logical_OR_expression   /* these are right associative */
+                        | logical_OR_expression '?' expression ':' conditional_expression
                         ;
 
-assignment-expression: conditional-expression   /* these are right associative */
-                        | unary-expression '=' assignment-expression
+assignment_expression: conditional_expression   /* these are right associative */
+                        | unary_expression '=' assignment_expression
                         ;
 
-expression: assignment-expression
+expression: assignment_expression
             ;
 
 /* 2. Declaration */
 
-declaration: type-specifier init-declarator ';'
+declaration: type_specifier init_declarator ';'
             ;
 
-init-declarator: declarator
+init_declarator: declarator
                 | declarator '=' initializer
                 ;
 
-type-specifier: "void"
-                | "char"
-                | "int"
+type_specifier: VOID
+                | CHAR
+                | INT
                 ;
 
-pointer-opt: pointer
+pointer_opt: pointer
             | %empty
             ;
 
-declarator: pointer-opt direct-declarator
+declarator: pointer_opt direct_declarator
             ;
 
-parameter-list-opt: parameter-list
+parameter_list_opt: parameter_list
                     | %empty
                     ;
 
-direct-declarator: IDENTIFIER
-                    | IDENTIFIER '[' CONSTANT ']'   /* check here again */
-                    | IDENTIFIER '(' parameter-list-opt ')'
+direct_declarator: IDENTIFIER
+                    | IDENTIFIER '[' INTEGER_CONSTANT ']'   /* check here again */
+                    | IDENTIFIER '(' parameter_list_opt ')'
                     ;
 
 pointer: '*'
 
-parameter-list: parameter-declaration
-                | parameter-list ',' parameter-declaration
+parameter_list: parameter_declaration
+                | parameter_list ',' parameter_declaration
                 ;
 
-identifier-opt: IDENTIFIER
+identifier_opt: IDENTIFIER
                 | %empty
                 ;
 
-parameter-declaration: type-specifier pointer-opt identifier-opt
+parameter_declaration: type_specifier pointer_opt identifier_opt
                         ;
 
-initializer: assignment-expression
+initializer: assignment_expression
             ;
 
 /* 3. Statements */
 
-statement: compound-statement
-            | expression-statement
-            | selection-statement
-            | iteration-statement
-            | jump-statement
+statement: compound_statement
+            | expression_statement
+            | selection_statement
+            | iteration_statement
+            | jump_statement
             ;
 
-block-item-list-opt: block-item-list
+block_item_list_opt: block_item_list
                     | %empty
                     ;
 
-compound-statement: '{' block-item-list-opt '}'
+compound_statement: '{' block_item_list_opt '}'
                     ;
 
-block-item-list: block-item
-                | block-item-list block-item
+block_item_list: block_item
+                | block_item_list block_item
                 ;
 
-block-item: declaration
+block_item: declaration
             | statement
             ;
 
-expression-opt: expression
+expression_opt: expression
                 | %empty
                 ;
 
-expression-statement: expression-opt ';'
+expression_statement: expression_opt ';'
                     ;
 
-selection-statement: "if" '(' expression ')' statement
+selection_statement: "if" '(' expression ')' statement
                     | "if" '(' expression ')' statement "else" statement
                     ;
 
-iteration-statement: "for" '(' expression-opt ';' expression-opt ';' expression-opt ')' statement
+iteration_statement: "for" '(' expression_opt ';' expression_opt ';' expression_opt ')' statement
                     ;
 
-jump-statement: "return" expression-opt ';'
+jump_statement: "return" expression_opt ';'
                 ;
 
 /* 4. Translation Unit */
 
-translation-unit: function-definition
+translation_unit: function_definition
                 | declaration
                 ;
 
-function-definition: type-specifier declarator compound-statement
+function_definition: type_specifier declarator compound_statement
                     ;
 
 %%
