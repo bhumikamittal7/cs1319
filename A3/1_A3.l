@@ -1,18 +1,5 @@
 %{
-    #include<stdio.h>
     #include "1_A3.tab.h"
-    
-    #define KEYWORD                     2
-    #define IDENTIFIER                  3
-    #define INTEGER_CONSTANT            4
-    #define CHAR_CONSTANT               5
-    #define STRING_LITERAL              6
-    #define PUNCTUATOR                  7
-    #define SINGLE_LINE_COMMENT_START   8
-    #define SINGLE_LINE_COMMENT_END     9
-    #define MULTI_LINE_COMMENT_START    10
-    #define MULTI_LINE_COMMENT_END      11
-    #define INVALID_TOKEN               12
 %}
 
 
