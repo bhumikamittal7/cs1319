@@ -37,7 +37,7 @@ argument_expression_list_opt: argument_expression_list
 postfix_expression: primary_expression
                     | postfix_expression '[' expression ']'
                     | postfix_expression '(' argument_expression_list_opt ')'
-                    | postfix_expression "->" IDENTIFIER /* pointer indirection only one level */
+                    | postfix_expression ARROW IDENTIFIER /* pointer indirection only one level */
                     ;
 
 argument_expression_list: assignment_expression
@@ -49,7 +49,7 @@ unary_expression: postfix_expression
                 /* only a single prefix op is allowed - check here again */
                 ;
 
-unary_operator: '&' | '*' | '+' | '_' | '!'
+unary_operator: '&' | '*' | '+' | '-' | '!'
                 ;
 
 multiplicative_expression: unary_expression     /* these are left associative */
@@ -60,27 +60,27 @@ multiplicative_expression: unary_expression     /* these are left associative */
 
 additive_expression: multiplicative_expression  /* these are left associative */
                     | additive_expression '+' multiplicative_expression
-                    | additive_expression '_' multiplicative_expression
+                    | additive_expression '-' multiplicative_expression
                     ;
 
 relational_expression: additive_expression      /* these are left associative */
                         | relational_expression '<' additive_expression
                         | relational_expression '>' additive_expression
-                        | relational_expression "<=" additive_expression
-                        | relational_expression ">=" additive_expression
+                        | relational_expression LESS_THAN_EQUAL_TO additive_expression
+                        | relational_expression GREATER_THAN_EQUAL_TO additive_expression
                         ;
 
 equality_expression: relational_expression      /* these are left associative */
-                    | equality_expression "==" relational_expression
-                    | equality_expression "!=" relational_expression
+                    | equality_expression EQUAL_TO relational_expression
+                    | equality_expression NOT_EQUAL_TO relational_expression
                     ;
 
 logical_AND_expression: equality_expression     /* these are left associative */
-                        | logical_AND_expression "&&" equality_expression
+                        | logical_AND_expression LOGICAL_AND equality_expression
                         ;
 
 logical_OR_expression: logical_AND_expression   /* these are left associative */
-                        | logical_OR_expression "||" logical_AND_expression
+                        | logical_OR_expression LOGICAL_OR logical_AND_expression
                         ;
 
 conditional_expression: logical_OR_expression   /* these are right associative */
@@ -125,6 +125,7 @@ direct_declarator: IDENTIFIER
                     ;
 
 pointer: '*'
+        ;
 
 parameter_list: parameter_declaration
                 | parameter_list ',' parameter_declaration
@@ -171,14 +172,14 @@ expression_opt: expression
 expression_statement: expression_opt ';'
                     ;
 
-selection_statement: "if" '(' expression ')' statement
-                    | "if" '(' expression ')' statement "else" statement
+selection_statement: IF '(' expression ')' statement
+                    | IF '(' expression ')' statement ELSE statement
                     ;
 
-iteration_statement: "for" '(' expression_opt ';' expression_opt ';' expression_opt ')' statement
+iteration_statement: FOR '(' expression_opt ';' expression_opt ';' expression_opt ')' statement
                     ;
 
-jump_statement: "return" expression_opt ';'
+jump_statement: RETURN expression_opt ';'
                 ;
 
 /* 4. Translation Unit */
