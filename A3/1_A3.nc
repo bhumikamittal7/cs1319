@@ -13,6 +13,8 @@ int main(){
     else{
        s = 1;
     }
+    if (s == 1)
+        s = 10;
     for (;s==2;)
         s = 2;
     x = 2 + 5;
