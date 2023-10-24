@@ -8,6 +8,8 @@ void yyerror(const char *s);
 
 %}
 
+//detailed error messages
+%define parse.error verbose
 
 %token VOID CHAR INT IF ELSE FOR RETURN 
 %token IDENTIFIER INTEGER_CONSTANT CHARACTER_CONSTANT STRING_LITERAL 
