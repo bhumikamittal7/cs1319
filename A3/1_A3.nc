@@ -16,7 +16,7 @@ int main() {
         s = 10;
     for (; s == 2;)
         s = 2;
-    int x = 2 + 5;
+    int x = 2 + 05;
     x = 3 +5;
     return 0;
 }

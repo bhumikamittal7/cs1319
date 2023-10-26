@@ -10,7 +10,7 @@ NONDIGIT_DIGIT          [_a-zA-Z0-9]
 NON_ZERO_DIGIT          [1-9]
 SIGN                    [+|-]
 IDENTIFIER              {NONDIGIT}{NONDIGIT_DIGIT}*
-INTEGER_CONSTANT        {NON_ZERO_DIGIT}{DIGIT}*|0
+INTEGER_CONSTANT        0?{NON_ZERO_DIGIT}{DIGIT}*|0
 ESCAPE_SEQUENCE         \\[\'\"?\\abfnrtv]
 C_CHAR                  [^\'\\\n]|{ESCAPE_SEQUENCE}
 C_CHAR_SEQUENCE         {C_CHAR}+
