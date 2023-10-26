@@ -9,7 +9,7 @@ void yyerror(const char *s);
 %}
 
 //detailed error messages
-%define parse.error verbose
+// %define parse.error verbose
 
 %token VOID CHAR INT IF ELSE FOR RETURN 
 %token IDENTIFIER INTEGER_CONSTANT CHARACTER_CONSTANT STRING_LITERAL 
@@ -107,7 +107,7 @@ expression: assignment_expression           { printf("expression\n");}
 declaration: type_specifier init_declarator SEMICOLON   { printf("declaration\n");}
             ;
 
-init_declarator: declarator { printf("init_declarator\n");}
+init_declarator: declarator { printf("init-declarator\n");}
                 | declarator ASSIGN initializer { printf("init-declarator\n");}
                 ;
 
@@ -192,9 +192,13 @@ jump_statement: RETURN expression_opt SEMICOLON   { printf("jump-statement\n"); 
 
 /* 4. Translation Unit */
 
-translation_unit: function_definition   { printf("translation-unit\n"); }
-                | declaration        { printf("translation-unit\n"); }
+translation_unit: external_declaration   { printf("translation-unit\n"); }
+                | translation_unit external_declaration         { printf("translation-unit\n"); }
                 ;
+
+external_declaration: function_definition   { printf("external-declaration\n"); }
+                    | declaration        { printf("external-declaration\n"); }
+                    ;
 
 function_definition: type_specifier declarator compound_statement   { printf("function-definition\n"); }
                     ;

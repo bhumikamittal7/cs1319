@@ -17,10 +17,10 @@ int main() {
     for (; s == 2;)
         s = 2;
     int x = 2 + 5;
-    // x = 3 +5
+    x = 3 +5;
     return 0;
 }
-/*
+
 // Find fibonacci by co-recursion
 int f_odd(int n) {
     return (n == 1) ? 1 : f_even(n - 1) + f_odd(n - 2);
@@ -41,4 +41,3 @@ int main() {
     r = fibonacci(n);
     return 0;
 }
-*/
