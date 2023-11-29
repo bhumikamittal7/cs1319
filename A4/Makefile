@@ -1,9 +1,9 @@
 .SUFFIXES: 
 
-translator: 1_A4.y 1_A4_translator.c 1_A4.l
+translator: 1_A4.y 1_A4_translator.cxx 1_A4.l
 	bison -d 1_A4.y
 	flex -o lex.yy.c 1_A4.l
-	gcc 1_A4_translator.c 1_A4.tab.c lex.yy.c -lfl -Werror -o translator
+	g++ 1_A4_translator.cxx 1_A4.tab.c lex.yy.c -lfl -Werror -o translator
 
 build: translator
 

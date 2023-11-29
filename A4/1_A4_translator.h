@@ -89,7 +89,7 @@ class quad{
 
 class quadArray{
     public:
-        vectorSym<quad> array;				//Array of quads (it's a vector of quads)
+        vectorSym<quad> Array;				//Array of quads (it's a vector of quads)
 
         //Print
         void print();
@@ -144,7 +144,7 @@ void changeTable(symTable* newtable);							//Change to current symbol table
 struct Array{
     stringSym aType;                    //type of Array
     sym* loc;                           //location of the Array
-    sym* arrPtr;                       //pointer to the Array
+    sym* Array;                       //pointer to the Array
 };
 
 struct Statement{

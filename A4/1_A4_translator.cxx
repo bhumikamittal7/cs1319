@@ -21,7 +21,7 @@ void updateNextInstr(){
 }
 
 int nextInstr(){
-    return quadArr.array.size();
+    return quadArr.Array.size();
 }
 
 void generateSpace(int n){
@@ -268,9 +268,9 @@ void quadArray::print(){
     cout<<endl;
 
     int i = 0;
-    vector<quad>::iterator it = array.begin();
+    vector<quad>::iterator it = Array.begin();
 
-    while (it != array.end()){
+    while (it != Array.end()){
         cout << i << ": ";
         generateSpace(5);
         it->print();
@@ -297,11 +297,11 @@ string convertToString(int num){
 
 //emit 
 void emit(string op, string arg1, string arg2, string result){
-    quadArr.array.push_back(*(new quad(op, arg1, arg2, result)));
+    quadArr.Array.push_back(*(new quad(op, arg1, arg2, result)));
 }
 
 void emit(string op, int arg1, string arg2, string result){
-    quadArr.array.push_back(*(new quad(op, arg1, arg2, result)));
+    quadArr.Array.push_back(*(new quad(op, arg1, arg2, result)));
 }
 /*=========================================================================================*/
 
@@ -355,7 +355,7 @@ void backpatch(list<int> l, int address){
     string str = convertToString(address);
     list<int>::iterator it = l.begin();
     while(it!=l.end()){
-        quadArr.array[*it].result = str;
+        quadArr.Array[*it].result = str;
         it++;
     }
 }
