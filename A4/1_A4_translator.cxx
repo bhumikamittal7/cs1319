@@ -188,7 +188,7 @@ void symTable::print()
         cout << "__";
     cout << endl;
 
-    cout << "Table Name: " << (*this).name << "\t\t\t Parent Name: ";
+    cout << "Table Name: " << (*this).name << "\t\t\t\t\t\t Parent Name: ";
 
     if ((*this).parent != NULL)
         cout << (*this).parent->name << endl;
@@ -199,18 +199,12 @@ void symTable::print()
         cout << "__";
     cout << endl;
 
-    cout << "Name";
-    addSpaces(15);
-    cout << "Type";
-    addSpaces(15);
-    cout << "Initial Value";
-    addSpaces(15);
-    cout << "Size";
-    addSpaces(15);
-    cout << "Offset";
-    addSpaces(15);
-    cout << "Nested";
-    addSpaces(20);
+    cout << "Name";             addSpaces(15);
+    cout << "Type";             addSpaces(15);
+    cout << "Initial Value";    addSpaces(15);
+    cout << "Size";             addSpaces(15);
+    cout << "Offset";           addSpaces(15);
+    cout << "Nested";           addSpaces(20);
     cout << endl;
 
     ostringstream str1; // this is for the string stream
@@ -252,7 +246,7 @@ void symTable::print()
 
     for (int i = 0; i < 120; i++)
         cout << "-";
-    cout << "\n\n";
+    cout << "\n";
 
     for (list<symTable *>::iterator it1 = tableList.begin(); it1 != tableList.end(); it1++)
     {
@@ -342,33 +336,21 @@ void basicType::addType(string t, int s)
     size.push_back(s);
 }
 
-// Quad Array -  again, saw this formatting online so this part of the code is kinda inspired (my formatting wasn't this neat) - though the code is written by me (only style is copied)
+// Quad Array print
 void quadArray::print()
-{
-    for (int i = 0; i < 60; i++)
-        cout << "__";
-    cout << endl;
-
-    cout << "TAC" << endl;
-    for (int i = 0; i < 60; i++)
-        cout << "__";
-    cout << endl;
-
+{   
+    cout << "TAC (Three Address Code) \n" << endl;
     int k = 100;
     vector<quad>::iterator it = Array.begin();
 
     while (it != Array.end())
     {
         cout << k << ": ";
-        addSpaces(5);
+        addSpaces(2);
         it->print();
         it++;
         k++;
     }
-
-    for (int i = 0; i < 60; i++)
-        cout << "__";
-    cout << endl;
 }
 /*=========================================================================================*/
 
