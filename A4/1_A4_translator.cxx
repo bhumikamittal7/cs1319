@@ -222,22 +222,16 @@ void quad::print()
 		
 		(*this).printType1();
 	}
-	else if(op=="|")
+	else if(op=="||")
 	{
 		
-		(*this).printType1();
+		(*this).printType2();
 	}
-	else if(op=="^")
-	{
-			
-		(*this).printType1();
-	}
-	else if(op=="&")
+	else if(op=="&&")
 	{
 						
-		(*this).printType1();
+		(*this).printType2();
 	}
-	// Relational Operations
 	else if(op=="==")
 	{
 		
