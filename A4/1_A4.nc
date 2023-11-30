@@ -1,10 +1,15 @@
 int n = 10;
 int r;
 char s = 'a';
+int a[10];
+//pointer
+int *p;
+//string
+char *str = " ";
+int i;
+void hello(char s, char k);
 
-void hello(char s) {
-    printf("hello %c\n", s);
-}
+
 void fibonacci(int n) {
     if (n == 0) {
         return 0;

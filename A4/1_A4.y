@@ -795,12 +795,9 @@ expression: assignment_expression
 
 /* ===================================== 2. Declarations =====================================*/
 
-declaration: type_specifier init_declarator_list SEMICOLON	{ }
+declaration: type_specifier init_declarator SEMICOLON	{ }
 			| type_specifier SEMICOLON   {       }
             ;
-init_declarator_list: init_declarator	{   }
-				| init_declarator_list COMMA init_declarator {   }
-				;
 
 init_declarator: declarator {$$=$1;}
                 | declarator ASSIGN initializer 
@@ -816,6 +813,7 @@ init_declarator: declarator {$$=$1;}
 type_specifier: VOID    {var_type="void";}
                 | CHAR  { var_type="char"; }
                 | INT   { var_type="int"; }
+
                 ;
 
 declarator: pointer direct_declarator 
@@ -920,7 +918,6 @@ direct_declarator: IDENTIFIER
 							
 						}
 					}
-                    | direct_declarator L_SQUARE_BRACKET ASTERISK R_SQUARE_BRACKET {	}
 					| direct_declarator L_ROUND_BRACKET changetable parameter_list_opt R_ROUND_BRACKET  
 					{
 						ST->name = $1->name;
@@ -979,7 +976,6 @@ pointer: ASTERISK
 		$$ = new symbolType("ptr", $1);
 		updateNextInstr();
 	}
-	| %empty	{	}
         ;
 
 parameter_list: parameter_declaration           {       }
@@ -990,12 +986,8 @@ parameter_list_opt: parameter_list          {	}
                     | %empty               {	}
                     ;
 
-identifier_opt: IDENTIFIER  {	}
-                | %empty   {	}
-                ;
-
-parameter_declaration: type_specifier pointer identifier_opt   {	}
-                        ;
+parameter_declaration: type_specifier declarator   {	} 
+                         ;
 
 initializer: assignment_expression   { $$=$1->loc; }  
             ;

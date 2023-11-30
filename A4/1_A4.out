@@ -1,0 +1,117 @@
+
+TAC (Three Address Code) 
+
+100:   t0 = 10
+101:   n = t0
+102:   t1 = 'a'
+103:   s = t1
+104:   t2 = 10
+105:   str = t3
+106:   label fibonacci
+107:   t0 = 0
+108:   if n == t0 goto 11
+109:   goto 14
+110:   goto 31
+111:   t1 = 0
+112:   return t1
+113:   goto 
+114:   t2 = 1
+115:   if n == t2 goto 18
+116:   goto 21
+117:   goto 31
+118:   t3 = 1
+119:   return t3
+120:   goto 
+121:   t4 = 1
+122:   t5 = n - t4
+123:   param t5
+124:   call t6
+125:   t7 = 2
+126:   t8 = n - t7
+127:   param t8
+128:   call t9
+129:   t10 = t6 + t9
+130:   return t10
+131:   label main
+132:   param n
+133:   call t0
+134:   r = t0
+135:   t2 = 55
+136:   if r == t2 goto 39
+137:   goto 44
+138:   goto 48
+139:   param t3
+140:   param n
+141:   param r
+142:   call t4
+143:   goto 48
+144:   param t5
+145:   param n
+146:   param r
+147:   call t6
+148:   t7 = 0
+149:   return t7
+
+________________________________________________________________________________________________________________________
+Table Name: Global						 Parent Name: NULL
+________________________________________________________________________________________________________________________
+Name               Type               Initial Value               Size               Offset               Nested                    
+n                 int                    10                        4                   0                   NULL                    
+t0                int                    10                        4                   4                   NULL                    
+r                 int                    -                         4                   8                   NULL                    
+s                 char                   'a'                       1                   12                  NULL                    
+t1                char                   'a'                       1                   13                  NULL                    
+a                 arr(10,int)            -                         40                  14                  NULL                    
+t2                int                    10                        4                   54                  NULL                    
+p                 ptr(int)               -                         4                   58                  NULL                    
+str               ptr(char)              " "                       4                   62                  NULL                    
+t3                ptr(char)              " "                       4                   66                  NULL                    
+i                 int                    -                         4                   70                  NULL                    
+hello             void                   -                         0                   74                  hello                    
+fibonacci         void                   -                         0                   74                  fibonacci                    
+main              int                    -                         4                   74                  main                    
+------------------------------------------------------------------------------------------------------------------------
+________________________________________________________________________________________________________________________
+Table Name: hello						 Parent Name: Global
+________________________________________________________________________________________________________________________
+Name               Type               Initial Value               Size               Offset               Nested                    
+s                 char                   -                         1                   0                   NULL                    
+k                 char                   -                         1                   1                   NULL                    
+------------------------------------------------------------------------------------------------------------------------
+________________________________________________________________________________________________________________________
+Table Name: fibonacci						 Parent Name: Global
+________________________________________________________________________________________________________________________
+Name               Type               Initial Value               Size               Offset               Nested                    
+n                 int                    -                         4                   0                   NULL                    
+t0                int                    0                         4                   4                   NULL                    
+t1                int                    0                         4                   8                   NULL                    
+t2                int                    1                         4                   12                  NULL                    
+t3                int                    1                         4                   16                  NULL                    
+fibonacci         int                    -                         4                   20                  NULL                    
+t4                int                    1                         4                   24                  NULL                    
+t5                int                                              4                   28                  NULL                    
+t6                int                                              4                   32                  NULL                    
+t7                int                    2                         4                   36                  NULL                    
+t8                int                                              4                   40                  NULL                    
+t9                int                                              4                   44                  NULL                    
+t10               int                                              4                   48                  NULL                    
+------------------------------------------------------------------------------------------------------------------------
+________________________________________________________________________________________________________________________
+Table Name: main						 Parent Name: Global
+________________________________________________________________________________________________________________________
+Name               Type               Initial Value               Size               Offset               Nested                    
+return            int                    -                         4                   0                   NULL                    
+r                 int                    -                         4                   4                   NULL                    
+fibonacci         int                    -                         4                   8                   NULL                    
+n                 int                    -                         4                   12                  NULL                    
+t0                int                                              4                   16                  NULL                    
+t1                int                                              4                   20                  NULL                    
+t2                int                    55                        4                   24                  NULL                    
+printf            int                    -                         4                   28                  NULL                    
+t3                ptr(char)              "fibonacci(%d) = %d\n"    4                   32                  NULL                    
+t4                int                                              4                   36                  NULL                    
+t5                ptr(char)              "fibonacci(%d) = %d\n"    4                   40                  NULL                    
+t6                int                                              4                   44                  NULL                    
+t7                int                    0                         4                   48                  NULL                    
+------------------------------------------------------------------------------------------------------------------------
+
