@@ -14,7 +14,8 @@ void yyerror(const char *s);
 using namespace std;
 %}
 
-//detailed error messages
+
+
 %define parse.error verbose
 /* ==================================== UNION =============================================== */
 
@@ -166,13 +167,17 @@ postfix_expression: primary_expression
                                 	 
 						$$=new Array();
 						updateNextInstr();
-						$$->type=$1->type->arrtype;				// type=type of element	
+						$$->type=$1->type->arrtype;				
+
 						updateNextInstr();			
-						$$->Array=$1->Array;						// copy the base
+						$$->Array=$1->Array;						
+
 						updateNextInstr();
-						$$->loc=gentemp(new symbolType("int"));		// store computed address
+						$$->loc=gentemp(new symbolType("int"));		
+
 						updateNextInstr();
-						$$->aType="arr";						//aType is arr.
+						$$->aType="arr";						
+
 						updateNextInstr();
 						if($1->aType=="arr") 
 						{			
@@ -191,7 +196,8 @@ postfix_expression: primary_expression
 							
 						}
 						else 
-						{                        //if a 1D Array, simply calculate size
+						{                        
+
 							int p=sizeOfType($$->type);
 							updateNextInstr();
 							string str=convertToString(p);
@@ -260,7 +266,8 @@ unary_expression: postfix_expression { $$=$1; }
                                                 updateNextInstr();
                                                 break;
 
-										case '&':                                       //address of something, then generate a pointer temporary and emit the quad
+										case '&':                                       
+
 												
 												$$->Array=gentemp((new symbolType("ptr")));
 												updateNextInstr();
@@ -270,7 +277,8 @@ unary_expression: postfix_expression { $$=$1; }
 												updateNextInstr();
 												break;
 												
-										case '*':                          //value of something, then generate a temporary of the corresponding type and emit the quad	
+										case '*':                          
+
 											$$->aType="ptr";
 											updateNextInstr();
 											$$->loc=gentemp($2->Array->type->arrtype);
@@ -322,13 +330,16 @@ multiplicative_expression: unary_expression
 								{
 									$$->loc = gentemp($1->loc->type);	
 									updateNextInstr();
-									emit("=[]", $$->loc->name, $1->Array->name, $1->loc->name);     //emit with Array right
+									emit("=[]", $$->loc->name, $1->Array->name, $1->loc->name);     
+
 									updateNextInstr();
 									
 								}
-								else if($1->aType=="ptr")         //if it is of type ptr
+								else if($1->aType=="ptr")         
+
 								{ 
-									$$->loc = $1->loc;        //equate the locs
+									$$->loc = $1->loc;        
+
 									updateNextInstr();
 									
 								}
@@ -440,20 +451,25 @@ relational_expression: additive_expression      /* these are left associative */
 									cout << "Type Error in Program"<< endl;
 								}
 								else 
-								{      //check compatible types		
+								{      
+
 																
 									$$ = new Expression();
 									updateNextInstr();
-									$$->type = "bool";                         //new type is boolean
+									$$->type = "bool";                         
+
 									updateNextInstr();		
-									$$->trueList = makelist(nextInstr());     //makelist for trueList and falseList
+									$$->trueList = makelist(nextInstr());     
+
 									updateNextInstr();
 									$$->falseList = makelist(nextInstr()+1);
 									updateNextInstr();
-									emit("<", "", $1->loc->name, $3->loc->name);     //emit statement if a<b goto .. 
+									emit("<", "", $1->loc->name, $3->loc->name);     
+
 									updateNextInstr();
 									
-									emit("goto", "");	//emit statement goto ..
+									emit("goto", "");	
+
 									updateNextInstr();
 									
 								}
@@ -544,7 +560,8 @@ equality_expression: relational_expression      /* these are left associative */
                         }
                     | equality_expression EQUAL_TO relational_expression     
                     {
-						if(!compareSymbolType($1->loc, $3->loc))                //check compatible types
+						if(!compareSymbolType($1->loc, $3->loc))                
+
 						{
 							
 							cout << "Type Error"<< endl;
@@ -552,7 +569,8 @@ equality_expression: relational_expression      /* these are left associative */
 						else 
 						{
 							
-							convertBool2Int($1);                  //convert bool to INTEGER
+							convertBool2Int($1);                  
+
 							updateNextInstr();	
 							convertBool2Int($3);
 							updateNextInstr();
@@ -560,13 +578,16 @@ equality_expression: relational_expression      /* these are left associative */
 							updateNextInstr();
 							$$->type = "bool";
 							updateNextInstr();
-							$$->trueList = makelist(nextInstr());            //make lists for new expression
+							$$->trueList = makelist(nextInstr());            
+
 							updateNextInstr();
 							$$->falseList = makelist(nextInstr()+1); 
 							updateNextInstr();
-							emit("==", "", $1->loc->name, $3->loc->name);      //emit if a==b goto ..
+							emit("==", "", $1->loc->name, $3->loc->name);      
+
 							updateNextInstr();
-							emit("goto", "");				//emit goto ..
+							emit("goto", "");				
+
 							updateNextInstr();
 							
 						}
@@ -586,7 +607,8 @@ equality_expression: relational_expression      /* these are left associative */
 							updateNextInstr();
 							convertBool2Int($3);
 							updateNextInstr();
-							$$ = new Expression();                 //result is boolean
+							$$ = new Expression();                 
+
 							updateNextInstr();
 							$$->type = "bool";
 							updateNextInstr();
@@ -608,21 +630,28 @@ logical_AND_expression: equality_expression  { $$=$1; }	   /* these are left ass
                         | logical_AND_expression N LOGICAL_AND M equality_expression       
                         { 
 		 
-							convertInt2Bool($5);         //convert inclusive_or_expression INTEGER to bool
+							convertInt2Bool($5);         
+
 							updateNextInstr();
-							backpatch($2->nextList, nextInstr());        //$2->nextList goes to next instruction
+							backpatch($2->nextList, nextInstr());        
+
 							updateNextInstr();
-							convertInt2Bool($1);                  //convert logical_and_expression to bool
+							convertInt2Bool($1);                  
+
 							updateNextInstr();
-							$$ = new Expression();     //make new boolean expression 
+							$$ = new Expression();     
+
 							updateNextInstr();
 							$$->type = "bool";
 							updateNextInstr();
-							backpatch($1->trueList, $4);        //if $1 is true, we move to $5
+							backpatch($1->trueList, $4);        
+
 							updateNextInstr();
-							$$->trueList = $5->trueList;        //if $5 is also true, we get trueList for $$
+							$$->trueList = $5->trueList;        
+
 							updateNextInstr();
-							$$->falseList = merge($1->falseList, $5->falseList);    //merge their falselists
+							$$->falseList = merge($1->falseList, $5->falseList);    
+
 							updateNextInstr();
 							
 						}    
@@ -635,21 +664,28 @@ logical_OR_expression: logical_AND_expression   /* these are left associative */
                         | logical_OR_expression N LOGICAL_OR M logical_AND_expression     
                         { 
 							
-							convertInt2Bool($5);			 //convert logical_and_expression INTEGER to bool
+							convertInt2Bool($5);			 
+
 							updateNextInstr();
-							backpatch($2->nextList, nextInstr());	//$2->nextList goes to next instruction
+							backpatch($2->nextList, nextInstr());	
+
 							updateNextInstr();
-							convertInt2Bool($1);			//convert logical_or_expression to bool
+							convertInt2Bool($1);			
+
 							updateNextInstr();
-							$$ = new Expression();			//make new boolean expression
+							$$ = new Expression();			
+
 							updateNextInstr();
 							$$->type = "bool";
 							updateNextInstr();
-							backpatch($1->falseList, $4);		//if $1 is true, we move to $5
+							backpatch($1->falseList, $4);		
+
 							updateNextInstr();
-							$$->trueList = merge($1->trueList, $5->trueList);		//merge their truelists
+							$$->trueList = merge($1->trueList, $5->trueList);		
+
 							updateNextInstr();
-							$$->falseList = $5->falseList;		 	//if $5 is also false, we get falseList for $$
+							$$->falseList = $5->falseList;		 	
+
 							updateNextInstr();
 							
 						}
@@ -662,37 +698,48 @@ conditional_expression: logical_OR_expression   /* these are right associative *
                         | logical_OR_expression N QUESTION M expression N COLON M conditional_expression    
                         {
 							
-							//normal conversion method to get conditional expressions
-							$$->loc = gentemp($5->loc->type);       //generate temporary for expression
+							$$->loc = gentemp($5->loc->type);       
+
 							updateNextInstr();
 							$$->loc->update($5->loc->type);
 							updateNextInstr();
-							emit("=", $$->loc->name, $9->loc->name);      //make it equal to sconditional_expression
+							emit("=", $$->loc->name, $9->loc->name);      
+
 							updateNextInstr();
 							
-							list<int> l = makelist(nextInstr());        //makelist next instruction
-							emit("goto", "");              //prevent fallthrough
+							list<int> l = makelist(nextInstr());        
+
+							emit("goto", "");              
+
 							updateNextInstr();
 							
-							backpatch($6->nextList, nextInstr());        //after N, go to next instruction
+							backpatch($6->nextList, nextInstr());        
+
 							updateNextInstr();
 							emit("=", $$->loc->name, $5->loc->name);
 							updateNextInstr();
 							
-							list<int> m = makelist(nextInstr());         //makelist next instruction
+							list<int> m = makelist(nextInstr());         
+
 							updateNextInstr();
-							l = merge(l, m);						//merge the two lists
+							l = merge(l, m);						
+
 							updateNextInstr();
-							emit("goto", "");						//prevent fallthrough
+							emit("goto", "");						
+
 							updateNextInstr();
 							
-							backpatch($2->nextList, nextInstr());   //backpatching
+							backpatch($2->nextList, nextInstr());   
+
 							updateNextInstr();
-							convertInt2Bool($1);                   //convert expression to boolean
+							convertInt2Bool($1);                   
+
 							updateNextInstr();
-							backpatch($1->trueList, $4);           //$1 true goes to expression
+							backpatch($1->trueList, $4);           
+
 							updateNextInstr();
-							backpatch($1->falseList, $8);          //$1 false goes to conditional_expression
+							backpatch($1->falseList, $8);          
+
 							updateNextInstr();
 							backpatch(l, nextInstr());
 							updateNextInstr();
@@ -706,7 +753,8 @@ assignment_expression: conditional_expression   /* these are right associative *
                         }
                         | unary_expression ASSIGN assignment_expression  
                         	{
-								if($1->aType=="arr")       //if type is arr, simply check if we need to convert and emit
+								if($1->aType=="arr")       
+
 								{
 									
 									$3->loc = convertType($3->loc, $1->aType);
@@ -722,7 +770,8 @@ assignment_expression: conditional_expression   /* these are right associative *
 									updateNextInstr();
 									
 								}
-								else                              //otherwise assignment
+								else                              
+
 								{
 									
 									$3->loc = convertType($3->loc, $1->Array->type->type);
@@ -756,7 +805,8 @@ init_declarator_list: init_declarator	{   }
 init_declarator: declarator {$$=$1;}
                 | declarator ASSIGN initializer 
                 {
-					if($3->val!="") $1->val=$3->val;        //get the initial value and  emit it
+					if($3->val!="") $1->val=$3->val;        
+
 					emit("=", $1->name, $3->name);
 					updateNextInstr();
 					
@@ -773,11 +823,14 @@ declarator: pointer direct_declarator
 				
 				symbolType *t = $1;
 				updateNextInstr();
-				while(t->arrtype!=NULL) t = t->arrtype;           //for multidimensional arr1s, move in depth till you get the base type
+				while(t->arrtype!=NULL) t = t->arrtype;           
+
 				updateNextInstr();
-				t->arrtype = $2->type;                //add the base type 
+				t->arrtype = $2->type;                
+
 				updateNextInstr();
-				$$ = $2->update($1);                  //update
+				$$ = $2->update($1);                  
+
 				updateNextInstr();
 				
 			}
@@ -804,24 +857,29 @@ direct_declarator: IDENTIFIER
 						while(t->type == "arr") 
 						{
 							prev = t;	
-							t = t->arrtype;      //keep moving recursively to get basetype
+							t = t->arrtype;      
+
 							updateNextInstr();
 						}
 						if(prev==NULL) 
 						{
 							
-							int temp = atoi($3->loc->val.c_str());      //get initial value
+							int temp = atoi($3->loc->val.c_str());      
+
 							updateNextInstr();
-							symbolType* s = new symbolType("arr", $1->type, temp);        //create new symbol with that initial value
+							symbolType* s = new symbolType("arr", $1->type, temp);        
+
 							updateNextInstr();
-							$$ = $1->update(s);   //update the symbol table
+							$$ = $1->update(s);   
+
 							updateNextInstr();
 							
 						}
 						else 
 						{
 							
-							prev->arrtype =  new symbolType("arr", t, atoi($3->loc->val.c_str()));     //similar arguments as above		
+							prev->arrtype =  new symbolType("arr", t, atoi($3->loc->val.c_str()));     
+
 							updateNextInstr();
 							$$ = $1->update($1->type);
 							updateNextInstr();
@@ -838,13 +896,15 @@ direct_declarator: IDENTIFIER
 						while(t->type == "arr") 
 						{
 							prev = t;	
-							t = t->arrtype;         //keep moving recursively to base type
+							t = t->arrtype;         
+
 							updateNextInstr();
 						}
 						if(prev==NULL) 
 						{
 							
-							symbolType* s = new symbolType("arr", $1->type, 0);    //no initial values, simply keep 0
+							symbolType* s = new symbolType("arr", $1->type, 0);    
+
 							updateNextInstr();
 							$$ = $1->update(s);
 							updateNextInstr();
@@ -867,7 +927,8 @@ direct_declarator: IDENTIFIER
 						updateNextInstr();
 						if($1->type->type !="void") 
 						{
-							sym *s = ST->lookup("return");         //lookup for return value	
+							sym *s = ST->lookup("return");         
+
 							s->update($1->type);
 							updateNextInstr();
 							
@@ -876,7 +937,8 @@ direct_declarator: IDENTIFIER
 						updateNextInstr();	
 						ST->parent = globalST;
 						updateNextInstr();
-						changeTable(globalST);				// Come back to globalsymbol table
+						changeTable(globalST);				
+
 						updateNextInstr();
 						currentSymbol = $$;
 						updateNextInstr();
@@ -886,17 +948,20 @@ direct_declarator: IDENTIFIER
                     ;
 
 changetable: %empty 
-			{ 														// Used for changing to symbol table for a function
+			{ 														
+
 				if(currentSymbol->nested==NULL) 
 				{
 					
-					changeTable(new symTable(""));	// Function symbol table doesn't already exist
+					changeTable(new symTable(""));	
+
 					updateNextInstr();
 				}
 				else 
 				{
 					
-					changeTable(currentSymbol->nested);						// Function symbol table already exists
+					changeTable(currentSymbol->nested);						
+
 					updateNextInstr();
 					emit("label", ST->name);
 					updateNextInstr();
@@ -946,7 +1011,8 @@ statement: compound_statement
                 }
             | expression_statement 
 				{ 
-					$$=new Statement();              //create new statement with same nextList
+					$$=new Statement();              
+
 					$$->nextList=$1->nextList; 
 				}
             | selection_statement  
@@ -983,7 +1049,8 @@ block_item_list: block_item
                 | block_item_list M block_item   
 					{ 
 						$$=$3;
-						backpatch($1->nextList,$2);     //after $1, move to block_item via $2
+						backpatch($1->nextList,$2);     
+
 					}
                 ;
 
@@ -1000,32 +1067,42 @@ expression_statement: expression SEMICOLON  { $$=$1;}
 
 selection_statement: IF L_ROUND_BRACKET expression N R_ROUND_BRACKET M statement N 
 						{
-							backpatch($4->nextList, nextInstr());        //nextList of N goes to nextInstr
+							backpatch($4->nextList, nextInstr());        
+
 							updateNextInstr();
-							convertInt2Bool($3);         //convert expression to bool
+							convertInt2Bool($3);         
+
 							updateNextInstr();
-							$$ = new Statement();        //make new statement
+							$$ = new Statement();        
+
 							updateNextInstr();
-							backpatch($3->trueList, $6);        //is expression is true, go to M i.e just before statement body
+							backpatch($3->trueList, $6);        
+
 							updateNextInstr();
-							list<int> temp = merge($3->falseList, $7->nextList);   //merge falseList of expression, nextList of statement and second N
+							list<int> temp = merge($3->falseList, $7->nextList);   
+
 							updateNextInstr();
 							$$->nextList = merge($8->nextList, temp);
 							updateNextInstr();
 						}
                     | IF L_ROUND_BRACKET expression N R_ROUND_BRACKET M statement N ELSE M statement  
 						{
-							backpatch($4->nextList, nextInstr());		//nextList of N goes to nextInstr
+							backpatch($4->nextList, nextInstr());		
+
 							updateNextInstr();
-							convertInt2Bool($3);        //convert expression to bool
+							convertInt2Bool($3);        
+
 							updateNextInstr();
-							$$ = new Statement();       //make new statement
+							$$ = new Statement();       
+
 							updateNextInstr();
-							backpatch($3->trueList, $6);    //when expression is true, go to M1 else go to M2
+							backpatch($3->trueList, $6);    
+
 							updateNextInstr();
 							backpatch($3->falseList, $10);
 							updateNextInstr();
-							list<int> temp = merge($7->nextList, $8->nextList);       //merge the nextlists of the statements and second N
+							list<int> temp = merge($7->nextList, $8->nextList);       
+
 							updateNextInstr();
 							$$->nextList = merge($11->nextList,temp);	
 							updateNextInstr();
@@ -1035,22 +1112,29 @@ selection_statement: IF L_ROUND_BRACKET expression N R_ROUND_BRACKET M statement
 iteration_statement: FOR L_ROUND_BRACKET expression_statement M expression_statement M expression N R_ROUND_BRACKET M statement 
 					{
 						
-						$$ = new Statement();		 //create new statement
+						$$ = new Statement();		 
+
 						updateNextInstr();
-						convertInt2Bool($5);  //convert check expression to boolean
+						convertInt2Bool($5);  
+
 						updateNextInstr();
-						backpatch($5->trueList, $10);	//if expression is true, go to M2
+						backpatch($5->trueList, $10);	
+
 						updateNextInstr();
-						backpatch($8->nextList, $4);	//after N, go back to M1
+						backpatch($8->nextList, $4);	
+
 						updateNextInstr();
-						backpatch($11->nextList, $6);	//statement go back to expression
+						backpatch($11->nextList, $6);	
+
 						updateNextInstr();
 						string str=convertToString($6);
 						updateNextInstr();
-						emit("goto", str);				//prevent fallthrough
+						emit("goto", str);				
+
 						updateNextInstr();
 						
-						$$->nextList = $5->falseList;	//move out if statement is false	
+						$$->nextList = $5->falseList;	
+
 						updateNextInstr();
 							
 					}
@@ -1107,6 +1191,7 @@ declaration_list_opt: %empty {  }
 
 %%
 
-void yyerror(const char * s) {        //print syntax error
+void yyerror(const char * s) {        
+
     cout<<s<<endl;
 }
