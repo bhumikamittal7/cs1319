@@ -164,10 +164,12 @@ void symTable::print(){
         str1.str("");
         str1.clear();
         if(it->nested!=NULL) {cout<<it->nested->name; tableList.push_back(it->nested);}
-        else cout<<"NULL"<<endl;
+        else cout<<"NULL";
+        generateSpace(20);
+        cout<<endl;
     }
 
-    for (int i=0; i<60; i++) cout<<"-";
+    for (int i=0; i<120; i++) cout<<"-";
     cout<<"\n\n";
 
     for (list<symTable*>::iterator it1 = tableList.begin(); it1 != tableList.end(); it1++){
@@ -197,69 +199,14 @@ void quad::print()
 {                                    //Print a quad
 	// Binary Operations
 	int nextInstr = 0;	
-	if(op=="+")
+	if(op=="+" || op=="-" || op=="*" || op=="/" || op=="%")
 	{	
 			
 		(*this).printType1();
 	}
-	else if(op=="-")
-	{				
-		
-		(*this).printType1();
-	}
-	else if(op=="*")
+	else if(op=="||" | op=="&&" | op=="==" | op=="!=" | op=="<=" | op=="<" | op==">" | op==">=")
 	{
 		
-		(*this).printType1();
-	}
-	else if(op=="/")
-	{	
-			
-		(*this).printType1();
-	}
-	else if(op=="%")
-	{
-		
-		(*this).printType1();
-	}
-	else if(op=="||")
-	{
-		
-		(*this).printType2();
-	}
-	else if(op=="&&")
-	{
-						
-		(*this).printType2();
-	}
-	else if(op=="==")
-	{
-		
-		(*this).printType2();
-	}
-	else if(op=="!=")
-	{
-		
-		(*this).printType2();
-	}
-	else if(op=="<=")
-	{
-		
-		(*this).printType2();
-	}
-	else if(op=="<")
-	{	
-					
-		(*this).printType2();
-	}
-	else if(op==">")
-	{
-		
-		(*this).printType2();
-	}
-	else if(op==">=")
-	{
-						
 		(*this).printType2();
 	}
 	else if(op=="=")
@@ -283,6 +230,18 @@ void quad::print()
 		 			
 		cout<<"return "<<result;
 	}
+    else if(op=="goto"){
+        cout<<"goto "<<result;
+    }
+        else if(op=="label"){
+        cout<<"label "<<result;
+    }
+        else if(op=="param"){
+        cout<<"param "<<result;
+    }
+    else if(op=="call"){
+        cout<<"call "<<result;
+    }
 	else
 	{	
 		cout<<"Can't find "<<op;
@@ -535,6 +494,7 @@ int main(){
     quadArr.print();        //print the TAC
     cout << "\n";
     globalST->print();     //print the symbol table
+     cout << "\n";
 
     //pls work otherwise i will legit kms bruh!
 }

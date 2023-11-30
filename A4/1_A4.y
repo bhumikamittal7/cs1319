@@ -883,7 +883,6 @@ direct_declarator: IDENTIFIER
 						
 					}
 					| L_ROUND_BRACKET declarator R_ROUND_BRACKET { $$ = $2; }
-					| direct_declarator L_ROUND_BRACKET identifier_list R_ROUND_BRACKET
                     ;
 
 changetable: %empty 
@@ -933,12 +932,7 @@ identifier_opt: IDENTIFIER  {	}
                 | %empty   {	}
                 ;
 
-identifier_list: IDENTIFIER  {	}
-				| identifier_list COMMA IDENTIFIER {	}
-				;
-
 parameter_declaration: type_specifier pointer identifier_opt   {	}
-
                         ;
 
 initializer: assignment_expression   { $$=$1->loc; }  
