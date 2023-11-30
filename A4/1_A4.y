@@ -5,6 +5,8 @@
 #include "1_A4_translator.h"
 #include <iostream>              
 #include <cstdlib>
+#include <sstream>
+
 
 extern int yylex();
 void yyerror(const char *s);
@@ -110,7 +112,7 @@ constant: INTEGER_CONSTANT
 		updateNextInstr();
 		string p=convertToString($1);
 		updateNextInstr();
-		$$->loc=gentemp(new symbolType("INTEGER"),p);
+		$$->loc=gentemp(new symbolType("int"),p);
 		updateNextInstr();
 		emit("=",$$->loc->name,p);
 		updateNextInstr();
@@ -119,7 +121,7 @@ constant: INTEGER_CONSTANT
         {
 		$$=new Expression();
 		updateNextInstr();
-		$$->loc=gentemp(new symbolType("CHAR"),$1);
+		$$->loc=gentemp(new symbolType("char"),$1);
 		updateNextInstr();
 		emit("=",$$->loc->name,string($1));
 		updateNextInstr();
@@ -143,9 +145,9 @@ primary_expression : IDENTIFIER
                     {
                         $$=new Expression();
                         updateNextInstr();
-                        $$->loc=gentemp(new symbolType("PTR"),$1);
+                        $$->loc=gentemp(new symbolType("ptr"),$1);
                         updateNextInstr();
-                        $$->loc->type->arrtype=new symbolType("CHAR");
+                        $$->loc->type->arrtype=new symbolType("char");
                         updateNextInstr();
                         
                     }
@@ -180,14 +182,14 @@ postfix_expression: primary_expression
 						updateNextInstr();			
 						$$->Array=$1->Array;						// copy the base
 						updateNextInstr();
-						$$->loc=gentemp(new symbolType("INTEGER"));		// store computed address
+						$$->loc=gentemp(new symbolType("int"));		// store computed address
 						updateNextInstr();
-						$$->aType="ARR";						//aType is ARR.
+						$$->aType="arr";						//aType is arr.
 						updateNextInstr();
-						if($1->aType=="ARR") 
-						{			// if already ARR, multiply the size of the sub-type of Array with the expression value and add
+						if($1->aType=="arr") 
+						{			// if already arr, multiply the size of the sub-type of Array with the expression value and add
 							
-							sym* t=gentemp(new symbolType("INTEGER"));
+							sym* t=gentemp(new symbolType("int"));
 							updateNextInstr();
 							int p=sizeOfType($$->type);
 							updateNextInstr();
@@ -296,7 +298,7 @@ multiplicative_expression: unary_expression     /* these are left associative */
 		 
 		$$ = new Expression();             //generate new expression	
 		updateNextInstr();						    
-		if($1->aType=="ARR") 			   //if it is of type ARR
+		if($1->aType=="arr") 			   //if it is of type arr
 		{
 			$$->loc = gentemp($1->loc->type);	
 			updateNextInstr();
@@ -304,7 +306,7 @@ multiplicative_expression: unary_expression     /* these are left associative */
 			updateNextInstr();
 			 
 		}
-		else if($1->aType=="PTR")         //if it is of type PTR
+		else if($1->aType=="ptr")         //if it is of type ptr
 		{ 
 			$$->loc = $1->loc;        //equate the locs
 			updateNextInstr();
@@ -659,7 +661,7 @@ assignment_expression: conditional_expression   /* these are right associative *
                         }
                         | unary_expression ASSIGN assignment_expression  
                         	 {
-		if($1->aType=="ARR")       //if type is ARR, simply check if we need to convert and emit
+		if($1->aType=="arr")       //if type is arr, simply check if we need to convert and emit
 		{
 			 
 			$3->loc = convertType($3->loc, $1->aType);
@@ -668,7 +670,7 @@ assignment_expression: conditional_expression   /* these are right associative *
 			updateNextInstr();
 			 
 		}
-		else if($1->aType=="PTR")     //if type is PTR, simply emit
+		else if($1->aType=="ptr")     //if type is ptr, simply emit
 		{
 			 
 			emit("*=", $1->Array->name, $3->loc->name);		
@@ -712,9 +714,9 @@ init_declarator: declarator {$$=$1;}
 	}
                 ;
 
-type_specifier: VOID    {var_type="VOID";}
-                | CHAR  { var_type="CHAR"; }
-                | INT   { var_type="INTEGER"; }
+type_specifier: VOID    {var_type="void";}
+                | CHAR  { var_type="char"; }
+                | INT   { var_type="int"; }
                 ;
 
 
@@ -754,7 +756,7 @@ direct_declarator: IDENTIFIER
 
 pointer: ASTERISK   
 	{ 
-		$$ = new symbolType("PTR");
+		$$ = new symbolType("ptr");
 		updateNextInstr();
 		  
 	}
