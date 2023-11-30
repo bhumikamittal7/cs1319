@@ -72,10 +72,10 @@ class symTable{
 
 class quad{
     public:
+        stringSym result;
         stringSym op;				     
         stringSym arg1;				      
         stringSym arg2;				      
-        stringSym result;
 
         //Print
         void print();
@@ -83,8 +83,8 @@ class quad{
         void printType2();
 
         //Constructors (because we have different types of quads - overloading stuff)
-        quad(stringSym op = "=", stringSym, stringSym arg2 = " ", stringSym); 
-        quad(stringSym op = "=", int, stringSym arg2 = " ", stringSym); 
+        quad(stringSym, stringSym, stringSym op = "=", stringSym arg2 = ""); 
+        quad(stringSym, int, stringSym op = "=", stringSym arg2 = ""); 
 };
 
 class quadArray{
@@ -129,9 +129,8 @@ bool compareSymbolType(symbolType*, symbolType*);		//Same type of two symbolType
 
 
 //Emit functions
-void emit(stringSym, stringSym arg1 = "", stringSym arg2 = "", stringSym);  //binary operators
-void emit(stringSym, int, stringSym arg2 = "", stringSym);		  			//unary operators
-void emit (string op = "=", stringSym, stringSym arg2 = "", stringSym);    //copy operators
+void emit(stringSym, stringSym, stringSym arg1 = "", stringSym arg2 = "");  //binary operators
+void emit(stringSym, int, stringSym, stringSym arg2 = "");		  			//unary operators
 
 int nextInstr();                                                //returns the next instruction number
 void updateNextInstr();
@@ -145,6 +144,7 @@ struct Array{
     stringSym aType;                    //type of Array
     sym* loc;                           //location of the Array
     sym* Array;                       //pointer to the Array
+    symbolType* type;                   //type of the sub Array
 };
 
 struct Statement{

@@ -14,6 +14,7 @@ sym* currentSymbol;				    // current Symbol
 quadArray quadArr;				    // Quad Array
 basicType bType;				    // Basic Type
 long long int instrCount;			// Instruction Count
+string var_type;                    //this is for the variable type
 /*=========================================================================================*/
 //Stupid functions 
 void updateNextInstr(){
@@ -296,13 +297,15 @@ string convertToString(int num){
 /*=========================================================================================*/
 
 //emit 
-void emit(string op, string arg1, string arg2, string result){
-    quadArr.Array.push_back(*(new quad(op, arg1, arg2, result)));
-}
+void emit(string op, string result, string arg1, string arg2){
+    quad *q1 = new quad(result, arg1, op, arg2);
+    quadArr.Array.push_back(*q1);
+    }
 
 void emit(string op, int arg1, string arg2, string result){
-    quadArr.Array.push_back(*(new quad(op, arg1, arg2, result)));
-}
+    quad *q2 = new quad(result, arg1, op, arg2);
+    quadArr.Array.push_back(*q2);
+    }
 /*=========================================================================================*/
 
 //type conversion stuff
@@ -378,6 +381,7 @@ Expression* convertInt2Bool(Expression* e){
         e -> trueList = makelist(nextInstr());
         emit("GOTO", " ");
     }
+    return e;
 }
 
 Expression* convertBool2Int(Expression* e){
@@ -391,6 +395,7 @@ Expression* convertBool2Int(Expression* e){
         backpatch(e->falseList, nextInstr());
         emit("=", e->loc->name, "false", " ");
     }
+     return e;
 }
 
 /*=========================================================================================*/
@@ -413,7 +418,7 @@ int sizeOfType(symbolType* t){
     else if(t->type=="ARR") return t->width * sizeOfType(t->arrtype);
     else if(t->type=="FUNC") return 0;
     else if(t->type=="BOOL") return 1;
-    else cout << "error" << endl;
+    else return -1;
 }
 
 string printType(symbolType* t){
@@ -425,7 +430,7 @@ string printType(symbolType* t){
     else if(t->type=="ARR") return (bType.type[5] + "(" + convertToString(t->width) + "," + printType(t->arrtype) + ")");
     else if(t->type=="FUNC") return (bType.type[6] + "(" + printType(t->arrtype) + ")");
     else if(t->type=="BOOL") return bType.type[7];
-    else cout << "error" << endl;
+    else return "error";
 }
 
 /*=========================================================================================*/

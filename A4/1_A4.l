@@ -49,16 +49,15 @@ INVALID_TOKEN           .
 {STRING_LITERAL}                {   yylval.char_value = yytext;
                                     return STRING_LITERAL;}
 
-{IDENTIFIER}                    {   yylval.sym = ST -> lookup(yytext);
+{IDENTIFIER}                    {   yylval.symPtr = ST -> lookup(yytext);
                                     return IDENTIFIER;}
 
 {INTEGER_CONSTANT}              {   yylval.intval = atoi(yytext);
                                     return INTEGER_CONSTANT;}
 
-{CHARACTER_CONSTANT}            {   yylval.char_value = yytext[1];
+{CHARACTER_CONSTANT}            {   yylval.char_value = yytext;
                                     return CHARACTER_CONSTANT;}
 
-/*edited here ends*/
 
 
 "["                             {return L_SQUARE_BRACKET;}

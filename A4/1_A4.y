@@ -18,9 +18,9 @@ using namespace std;
 /* ==================================== UNION =============================================== */
 
 %union {
-        char *charValue;
-        int intValue;
-        int instrCounter;
+        char *char_value;
+        int intval;
+        int instrCount;
         int paramCount;
 
         symbolType *symType;
@@ -36,9 +36,9 @@ using namespace std;
 
 %token <symPtr> IDENTIFIER
 
-%token <intValue> INTEGER_CONSTANT
-%token <charValue> CHARACTER_CONSTANT
-%token <charValue> STRING_LITERAL
+%token <intval> INTEGER_CONSTANT
+%token <char_value> CHARACTER_CONSTANT
+%token <char_value> STRING_LITERAL
 
 %token VOID CHAR INT IF ELSE FOR RETURN 
 %token L_SQUARE_BRACKET R_SQUARE_BRACKET L_ROUND_BRACKET R_ROUND_BRACKET L_CURLY_BRACKET R_CURLY_BRACKET 
@@ -48,13 +48,13 @@ using namespace std;
 
 %start translation_unit;
 
-%right "then" ELSE              //dangling else handled hopefully (are we suppose to this though?)
 
 /* ==================================== Type stuff  =============================================== */
 %type <unaryOp> unary_operator
 %type <paramCount> argument_expression_list argument_expression_list_opt
 %type <E> 
         expression 
+		expression_opt
         assignment_expression 
         conditional_expression 
         logical_OR_expression 
@@ -64,7 +64,8 @@ using namespace std;
         additive_expression 
         multiplicative_expression 
         primary_expression
-        expression_statement 
+        expression_statement
+		constant 
 
 
 %type <S>
@@ -86,17 +87,17 @@ using namespace std;
 	unary_expression
 
 /* =================== Auxillary non-terminals M and N used for backpatching =================== */
-%type <instrCounter> M 
+%type <instrCount> M 
 %type <S> N
 
 %%
 
-M: %empty { $$ = instrCounter; }
+M: %empty { $$ = instrCount; }
         ;
 
 N: %empty { 
         $$ = new Statement();
-        $$ -> nextList = makeList(nextInstr());
+        $$ -> nextList = makelist(nextInstr());
         emit("goto", "");
          
 }
@@ -172,23 +173,43 @@ postfix_expression: primary_expression
 
                     | postfix_expression L_SQUARE_BRACKET expression R_SQUARE_BRACKET
                 { 	
-                                
-                        $$=new Array();
-                        updateNextInstr();
-                        $$->type=$1->type->arrtype;				// type=type of element	
-                        updateNextInstr();			
-                        $$->Array=$1->Array;						// copy the base
-                        updateNextInstr();
-                        $$->loc=gentemp(new symbolType("INTEGER"));		// store computed address
-                        updateNextInstr();
-                        $$->aType="ARR";						//aType is ARR.
-                        updateNextInstr();
-                        INTEGER p=sizeOfType($$->type);
-                        updateNextInstr();
-                        string str=convertToString(p);
-                        updateNextInstr();
-                        emit("*",$$->loc->name,$3->loc->name,str);
-                        updateNextInstr();
+                                	 
+						$$=new Array();
+						updateNextInstr();
+						$$->type=$1->type->arrtype;				// type=type of element	
+						updateNextInstr();			
+						$$->Array=$1->Array;						// copy the base
+						updateNextInstr();
+						$$->loc=gentemp(new symbolType("INTEGER"));		// store computed address
+						updateNextInstr();
+						$$->aType="ARR";						//aType is ARR.
+						updateNextInstr();
+						if($1->aType=="ARR") 
+						{			// if already ARR, multiply the size of the sub-type of Array with the expression value and add
+							
+							sym* t=gentemp(new symbolType("INTEGER"));
+							updateNextInstr();
+							int p=sizeOfType($$->type);
+							updateNextInstr();
+							string str=convertToString(p);
+							updateNextInstr();
+							emit("*",t->name,$3->loc->name,str);
+							updateNextInstr();	
+							
+							emit("+",$$->loc->name,$1->loc->name,t->name);
+							updateNextInstr();
+							
+						}
+						else 
+						{                        //if a 1D Array, simply calculate size
+							int p=sizeOfType($$->type);
+							updateNextInstr();
+							string str=convertToString(p);
+							updateNextInstr();
+							emit("*",$$->loc->name,$3->loc->name,str);
+							updateNextInstr();
+							
+						}
 	        }
                     | postfix_expression L_ROUND_BRACKET argument_expression_list_opt R_ROUND_BRACKET
                     {
@@ -206,7 +227,7 @@ postfix_expression: primary_expression
 
 argument_expression_list: assignment_expression
                         {
-                                $$ = $1;
+                                $$ = 1;
                                 updateNextInstr();
                                 emit("param",$1->loc->name);	
                                 updateNextInstr();
@@ -271,9 +292,31 @@ unary_operator: AMPERSAND
                 ;
 
 multiplicative_expression: unary_expression     /* these are left associative */    
-                                {
-                                        $$ = $1;
-                                }
+                           {
+		 
+		$$ = new Expression();             //generate new expression	
+		updateNextInstr();						    
+		if($1->aType=="ARR") 			   //if it is of type ARR
+		{
+			$$->loc = gentemp($1->loc->type);	
+			updateNextInstr();
+			emit("=[]", $$->loc->name, $1->Array->name, $1->loc->name);     //emit with Array right
+			updateNextInstr();
+			 
+		}
+		else if($1->aType=="PTR")         //if it is of type PTR
+		{ 
+			$$->loc = $1->loc;        //equate the locs
+			updateNextInstr();
+			 
+		}
+		else
+		{
+			$$->loc = $1->Array;
+			updateNextInstr();
+			 
+		}
+	}
                             | multiplicative_expression ASTERISK unary_expression   
                             	{ 
 		 
@@ -619,7 +662,7 @@ assignment_expression: conditional_expression   /* these are right associative *
 		if($1->aType=="ARR")       //if type is ARR, simply check if we need to convert and emit
 		{
 			 
-			$3->loc = convertType($3->loc, $1->type->type);
+			$3->loc = convertType($3->loc, $1->aType);
 			updateNextInstr();
 			emit("[]=", $1->Array->name, $1->loc->name, $3->loc->name);		
 			updateNextInstr();
@@ -700,7 +743,7 @@ direct_declarator: IDENTIFIER
 		 
 		$$ = $1->update(new symbolType(var_type));
 		updateNextInstr();
-		currSymbolPtr = $$;
+		currentSymbol = $$;
 		updateNextInstr();
 		 
 		
@@ -711,7 +754,7 @@ direct_declarator: IDENTIFIER
 
 pointer: ASTERISK   
 	{ 
-		$$ = new symbolType("PTR",$3);
+		$$ = new symbolType("PTR");
 		updateNextInstr();
 		  
 	}
@@ -800,7 +843,7 @@ expression_opt: expression
 expression_statement: expression_opt SEMICOLON  {       }
                     ;
 
-selection_statement: IF L_ROUND_BRACKET expression N R_ROUND_BRACKET M statement N %prec "then"
+selection_statement: IF L_ROUND_BRACKET expression N R_ROUND_BRACKET M statement N 
 						{
 							backpatch($4->nextList, nextInstr());        //nextList of N goes to nextinstr
 							updateNextInstr();
@@ -836,22 +879,23 @@ selection_statement: IF L_ROUND_BRACKET expression N R_ROUND_BRACKET M statement
 
 iteration_statement: FOR L_ROUND_BRACKET expression_opt SEMICOLON M expression_opt SEMICOLON M expression_opt N R_ROUND_BRACKET M statement 
 					{
-						$$ = new Statement();
+
+						$$ = new Statement();		 //create new statement
 						updateNextInstr();
-						convertInt2Bool($5);
+						convertInt2Bool($6);  //convert check expression to boolean
 						updateNextInstr();
-						backpatch($5->trueList, $10);
+						backpatch($6->trueList, $12);	//if expression is true, go to M2
 						updateNextInstr();
-						backpatch($8->nextList, $4);	//after N, go back to M1
+						backpatch($10->nextList, $5);	//after N, go back to M1
 						updateNextInstr();
-						backpatch($11->nextList, $6);	//statement go back to expression
+						backpatch($13->nextList, $8);	//statement go back to expression
 						updateNextInstr();
-						string str=convertToString($6);
+						string str=convertToString($8);
 						updateNextInstr();
 						emit("GOTO", str);				//prevent fallthrough
 						updateNextInstr();
-
-						$$->nextList = $5->falseList;	
+						
+						$$->nextList = $6->falseList;	//move out if statement is false	
 						updateNextInstr();
 					}
                     ;
