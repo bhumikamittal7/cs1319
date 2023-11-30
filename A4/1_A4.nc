@@ -2,5 +2,5 @@ int i;
 int a = 17;
 int w[10];
 int *p;
-void function(int i, char c);
+void func(int i, char k);
 char c;

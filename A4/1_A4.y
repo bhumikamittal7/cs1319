@@ -66,7 +66,6 @@ using namespace std;
 		assignment_expression
 		expression_statement
 
-
 %type <S>
         statement 
 		compound_statement
@@ -78,7 +77,6 @@ using namespace std;
         block_item_list_opt
 
 %type <symType> pointer
-
 %type <symPtr> initializer
 %type <symPtr> direct_declarator init_declarator declarator
 
@@ -748,18 +746,21 @@ expression: assignment_expression
 
 /* ===================================== 2. Declarations =====================================*/
 
-declaration: type_specifier init_declarator SEMICOLON   {       }
+declaration: type_specifier init_declarator_list SEMICOLON	{ }
+			| type_specifier SEMICOLON   {       }
             ;
+init_declarator_list: init_declarator	{   }
+				| init_declarator_list COMMA init_declarator {   }
+				;
 
 init_declarator: declarator {$$=$1;}
                 | declarator ASSIGN initializer 
-                	{
-		 
-		if($3->val!="") $1->val=$3->val;        //get the initial value and  emit it
-		emit("=", $1->name, $3->name);
-		updateNextInstr();
-		 
-	}
+                {
+					if($3->val!="") $1->val=$3->val;        //get the initial value and  emit it
+					emit("=", $1->name, $3->name);
+					updateNextInstr();
+					
+				}
                 ;
 
 type_specifier: VOID    {var_type="void";}
@@ -767,40 +768,143 @@ type_specifier: VOID    {var_type="void";}
                 | INT   { var_type="int"; }
                 ;
 
-
 declarator: pointer direct_declarator 
-	{
-		 
-		symbolType *t = $1;
-		updateNextInstr();
-		while(t->arrtype!=NULL) t = t->arrtype;           //for multidimensional arr1s, move in depth till you get the base type
-		updateNextInstr();
-		t->arrtype = $2->type;                //add the base type 
-		updateNextInstr();
-		$$ = $2->update($1);                  //update
-		updateNextInstr();
-		 
-	}
-        | direct_declarator { }
+			{
+				
+				symbolType *t = $1;
+				updateNextInstr();
+				while(t->arrtype!=NULL) t = t->arrtype;           //for multidimensional arr1s, move in depth till you get the base type
+				updateNextInstr();
+				t->arrtype = $2->type;                //add the base type 
+				updateNextInstr();
+				$$ = $2->update($1);                  //update
+				updateNextInstr();
+				
+			}
+        	| direct_declarator { }
             ;
 
-parameter_list_opt: parameter_list          
-                    | %empty               
+direct_declarator: IDENTIFIER       
+					{
+						
+						$$ = $1->update(new symbolType(var_type));
+						updateNextInstr();
+						currentSymbol = $$;
+						updateNextInstr();
+						
+						
+					}
+					| direct_declarator L_SQUARE_BRACKET assignment_expression R_SQUARE_BRACKET 
+					{
+						
+						symbolType *t = $1 -> type;
+						updateNextInstr();
+						symbolType *prev = NULL;
+						updateNextInstr();
+						while(t->type == "arr") 
+						{
+							prev = t;	
+							t = t->arrtype;      //keep moving recursively to get basetype
+							updateNextInstr();
+						}
+						if(prev==NULL) 
+						{
+							
+							int temp = atoi($3->loc->val.c_str());      //get initial value
+							updateNextInstr();
+							symbolType* s = new symbolType("arr", $1->type, temp);        //create new symbol with that initial value
+							updateNextInstr();
+							$$ = $1->update(s);   //update the symbol table
+							updateNextInstr();
+							
+						}
+						else 
+						{
+							
+							prev->arrtype =  new symbolType("arr", t, atoi($3->loc->val.c_str()));     //similar arguments as above		
+							updateNextInstr();
+							$$ = $1->update($1->type);
+							updateNextInstr();
+							
+						}
+					}
+					| direct_declarator L_SQUARE_BRACKET R_SQUARE_BRACKET 
+					{
+						
+						symbolType *t = $1 -> type;
+						updateNextInstr();
+						symbolType *prev = NULL;
+						updateNextInstr();
+						while(t->type == "arr") 
+						{
+							prev = t;	
+							t = t->arrtype;         //keep moving recursively to base type
+							updateNextInstr();
+						}
+						if(prev==NULL) 
+						{
+							
+							symbolType* s = new symbolType("arr", $1->type, 0);    //no initial values, simply keep 0
+							updateNextInstr();
+							$$ = $1->update(s);
+							updateNextInstr();
+								
+						}
+						else 
+						{
+							
+							prev->arrtype =  new symbolType("arr", t, 0);
+							updateNextInstr();
+							$$ = $1->update($1->type);
+							updateNextInstr();
+							
+						}
+					}
+                    | direct_declarator L_SQUARE_BRACKET ASTERISK R_SQUARE_BRACKET {	}
+					| direct_declarator L_ROUND_BRACKET changetable parameter_list_opt R_ROUND_BRACKET  
+					{
+						ST->name = $1->name;
+						updateNextInstr();
+						if($1->type->type !="void") 
+						{
+							sym *s = ST->lookup("return");         //lookup for return value	
+							s->update($1->type);
+							updateNextInstr();
+							
+						}
+						$1->nested=ST;       
+						updateNextInstr();	
+						ST->parent = globalST;
+						updateNextInstr();
+						changeTable(globalST);				// Come back to globalsymbol table
+						updateNextInstr();
+						currentSymbol = $$;
+						updateNextInstr();
+						
+					}
+					| L_ROUND_BRACKET declarator R_ROUND_BRACKET { $$ = $2; }
+					| direct_declarator L_ROUND_BRACKET identifier_list R_ROUND_BRACKET
                     ;
 
-direct_declarator: IDENTIFIER       
-	{
-		 
-		$$ = $1->update(new symbolType(var_type));
-		updateNextInstr();
-		currentSymbol = $$;
-		updateNextInstr();
-		 
-		
-	}
-                    | IDENTIFIER L_SQUARE_BRACKET INTEGER_CONSTANT R_SQUARE_BRACKET  
-                    | IDENTIFIER L_ROUND_BRACKET parameter_list_opt R_ROUND_BRACKET  
-                    ;
+changetable: %empty 
+			{ 														// Used for changing to symbol table for a function
+				if(currentSymbol->nested==NULL) 
+				{
+					
+					changeTable(new symTable(""));	// Function symbol table doesn't already exist
+					updateNextInstr();
+				}
+				else 
+				{
+					
+					changeTable(currentSymbol->nested);						// Function symbol table already exists
+					updateNextInstr();
+					emit("label", ST->name);
+					updateNextInstr();
+					
+				}
+			}
+			;
 
 pointer: ASTERISK   
 	{ 
@@ -808,17 +912,33 @@ pointer: ASTERISK
 		updateNextInstr();
 		  
 	}
+	| pointer ASTERISK
+	{
+		$$ = new symbolType("ptr", $1);
+		updateNextInstr();
+	}
+	| %empty	{	}
         ;
 
 parameter_list: parameter_declaration           {       }
                 | parameter_list COMMA parameter_declaration {  }
                 ;
 
-identifier_opt: IDENTIFIER  
-                | %empty   
+
+parameter_list_opt: parameter_list          {	}
+                    | %empty               {	}
+                    ;
+
+identifier_opt: IDENTIFIER  {	}
+                | %empty   {	}
                 ;
 
-parameter_declaration: type_specifier pointer identifier_opt   
+identifier_list: IDENTIFIER  {	}
+				| identifier_list COMMA IDENTIFIER {	}
+				;
+
+parameter_declaration: type_specifier pointer identifier_opt   {	}
+
                         ;
 
 initializer: assignment_expression   { $$=$1->loc; }  
@@ -969,16 +1089,27 @@ external_declaration: function_definition       {   }
                     | declaration         {   }
                     ;
 
-function_definition: type_specifier declarator compound_statement  
-                        {
-                            int nextInstr = 0;
-							updateNextInstr();
-							ST->parent=globalST;
-							updateNextInstr();
-							changeTable(globalST);                  
-							updateNextInstr();
-                        }
-                    ;
+
+function_definition: type_specifier declarator declaration_list_opt changetable compound_statement  
+					{
+						
+						int nextInstr=0;	 
+						updateNextInstr();
+						ST->parent=globalST;
+						updateNextInstr();
+						changeTable(globalST);                    
+						updateNextInstr();
+						
+					}
+					;
+
+declaration_list: declaration   {  }
+				| declaration_list declaration	{  }
+				;				   										  				   
+
+declaration_list_opt: %empty {  }
+					| declaration_list   {  }
+					;
 
 %%
 
