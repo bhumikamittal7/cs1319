@@ -4,7 +4,6 @@ OUTPUT_FILE = 1_A4.out
 
 all: $(TARGET)
 	./$(TARGET) < $(TEST_FILE) > $(OUTPUT_FILE)
-	@echo "Test File Successfully Translated !\n"
 
 $(TARGET): lex.yy.o 1_A4.tab.o 1_A4_translator.o
 	g++ lex.yy.o 1_A4.tab.o 1_A4_translator.o -ll -o $(TARGET) -Werror
@@ -26,8 +25,8 @@ lex.yy.c: 1_A4.l 1_A4.tab.h 1_A4_translator.h
 	bison -d 1_A4.y
 
 clean:
-	rm lex.yy.c 1_A4.tab.c 1_A4.tab.h lex.yy.o 1_A4.tab.o 1_A4_translator.o $(TARGET) 1_A4_translator.h.gch $(OUTPUT_FILE)
+	rm lex.yy.c 1_A4.tab.c 1_A4.tab.h lex.yy.o 1_A4.tab.o 1_A4_translator.o $(TARGET) 1_A4_translator.h.gch
 
-build: clean all
+build: $(TARGET)
 
 .PHONY: clean build
