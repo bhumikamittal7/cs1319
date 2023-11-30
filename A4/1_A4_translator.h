@@ -114,7 +114,7 @@ extern basicType bType;                        // denotes the Type ST
 extern long long int instrCount;			// denotes tempCount of instr
 
 stringSym convertToString(int );
-voidSym generateSpaces(int );
+voidSym addSpacess(int );
 //Different Attributes for Different Types and Extra Functions
 
 s* gentemp (symbolType* , stringSym initalVal = "");	  //generate a temporary variable and insert it in the current ST
@@ -294,7 +294,7 @@ Expression*  convertBool2Int(Expression* );				// convert boolean expression to 
 
 // //Function Declarations
 // stringSym convertToString(int);				//Converts an integer to a string
-// void generateSpace(int);					//Generates spaces for indentation
+// void addSpaces(int);					//Generates spaces for indentation
 
 // sym* gentemp(symbolType*, stringSym initalVal = "" );					//Generate a temporary variable and insert it in the current symbol table
 

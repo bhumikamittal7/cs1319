@@ -25,7 +25,7 @@ int nextInstr(){
     return quadArr.Array.size();
 }
 
-void generateSpace(int n){
+void addSpaces(int n){
     for (int i=0; i<n; i++) cout<<" ";
 }
 /*=========================================================================================*/
@@ -125,47 +125,47 @@ void symTable::print(){
     cout<<endl;
 
     cout<<"Name";
-    generateSpace(15);
+    addSpaces(15);
     cout<<"Type";
-    generateSpace(15);
+    addSpaces(15);
     cout<<"Initial Value";
-    generateSpace(15);
+    addSpaces(15);
     cout<<"Size";
-    generateSpace(15);
+    addSpaces(15);
     cout<<"Offset";
-    generateSpace(15);
+    addSpaces(15);
     cout<<"Nested";
-    generateSpace(20);
+    addSpaces(20);
     cout<<endl;
 
     ostringstream str1;         //this is for the string stream
 
     for (listIterator it = table.begin(); it != table.end(); it++){
         cout<<it->name;
-        generateSpace(18 - it->name.length());
+        addSpaces(18 - it->name.length());
 
         string typeResult = printType(it->type);
         cout<<typeResult;
-        generateSpace(23 - typeResult.length());
+        addSpaces(23 - typeResult.length());
 
         cout<<it->val;
-        generateSpace(26 - it->val.length());
+        addSpaces(26 - it->val.length());
 
         cout << it->size;
         str1 << it->size;
-        generateSpace(20 - str1.str().length());
+        addSpaces(20 - str1.str().length());
 
         str1.str("");
         str1.clear();
         cout << it->offset;
         str1 << it->offset;
-        generateSpace(20 - str1.str().length());
+        addSpaces(20 - str1.str().length());
 
         str1.str("");
         str1.clear();
         if(it->nested!=NULL) {cout<<it->nested->name; tableList.push_back(it->nested);}
         else cout<<"NULL";
-        generateSpace(20);
+        addSpaces(20);
         cout<<endl;
     }
 
@@ -315,7 +315,7 @@ void quadArray::print(){
 
     while (it != Array.end()){
         cout << k << ": ";
-        generateSpace(5);
+        addSpaces(5);
         it->print();
         it++;
         k++;
