@@ -954,14 +954,12 @@ changetable: %empty
 				{
 					
 					changeTable(new symTable(""));	
-
 					updateNextInstr();
 				}
 				else 
 				{
 					
 					changeTable(currentSymbol->nested);						
-
 					updateNextInstr();
 					emit("label", ST->name);
 					updateNextInstr();
@@ -987,7 +985,6 @@ pointer: ASTERISK
 parameter_list: parameter_declaration           {       }
                 | parameter_list COMMA parameter_declaration {  }
                 ;
-
 
 parameter_list_opt: parameter_list          {	}
                     | %empty               {	}
@@ -1167,7 +1164,6 @@ external_declaration: function_definition       {   }
                     | declaration         {   }
                     ;
 
-
 function_definition: type_specifier declarator declaration_list_opt changetable compound_statement  
 					{
 						
@@ -1192,6 +1188,5 @@ declaration_list_opt: %empty {  }
 %%
 
 void yyerror(const char * s) {        
-
-    cout<<s<<endl;
+		cout << "Error: " << s << endl;
 }
