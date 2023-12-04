@@ -12,8 +12,8 @@ int labelCount=0;
 std::map<int, int> labelMap;				
 ofstream out;								
 vector <quad> Array;						
-string asmfilename="ass6_18CS10069_";		
-string inputfile="ass6_18CS10069_test";		
+string asmfilename="test_";		
+string inputfile="test";		
 
 
 void computeActivationRecord(symTable* st) {
@@ -55,7 +55,7 @@ void genasm() {
 		it->second = tempCount++;
 	list<symTable*> tablelist;
 	
-	for (list <sym>::iterator it = globalTable->table.begin(); it!=globalTable->table.end(); it++) {
+	for (list <sym>::iterator it = globalST->table.begin(); it!=globalST->table.end(); it++) {
 		if (it->nested!=NULL) tablelist.push_back (it->nested);
 	}
 	
@@ -304,7 +304,7 @@ void genasm() {
 			
 			else if (op=="CALL") {
 				
-				symTable* t = globalTable->lookup(arg1)->nested;
+				symTable* t = globalST->lookup(arg1)->nested;
 				int i,j=0;	
 				for (list <sym>::iterator it = t->table.begin(); it!=t->table.end(); it++) {
 					i = distance ( t->table.begin(), it);
@@ -356,7 +356,7 @@ void genasm() {
 				sfile << "\t.cfi_offset 5, -8" << endl;
 				sfile << "\tmovq \t%rsp, %rbp" << endl;
 				sfile << "\t.cfi_def_cfa_register 5" << endl;
-				table = globalTable->lookup(result)->nested;
+				table = globalST->lookup(result)->nested;
 				sfile << "\tsubq\t$" << table->table.back().offset+24 << ", %rsp"<<endl;
 				
 				
@@ -414,14 +414,14 @@ ostream& operator<<(ostream& os, const vector<T>& v)
 }
 
 int main(int ac, char* av[]) {
-	inputfile=inputfile+string(av[ac-1])+string(".c");
-	asmfilename=asmfilename+string(av[ac-1])+string(".s");
-	globalTable = new symTable("Global");
-	table = globalTable;
+	inputfile=inputfile+string(av[ac-1])+string(".nc");
+	asmfilename=asmfilename+string(av[ac-1])+string(".asm");
+	globalST = new symTable("Global");
+	table = globalST;
 	yyin = fopen(inputfile.c_str(),"r"); 
 	yyparse();
-	globalTable->update();
-	globalTable->print();
+	globalST->update();
+	globalST->print();
 	q.print();
 	genasm();
 }

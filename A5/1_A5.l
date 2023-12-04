@@ -49,7 +49,7 @@ INVALID_TOKEN           .
 {STRING_LITERAL}                {   yylval.char_value = yytext;
                                     return STRING_LITERAL;}
 
-{IDENTIFIER}                    {   yylval.symPtr = ST -> lookup(yytext);
+{IDENTIFIER}                    {   yylval.symPtr = table -> lookup(yytext);
                                     return IDENTIFIER;}
 
 {INTEGER_CONSTANT}              {   yylval.intval = atoi(yytext);

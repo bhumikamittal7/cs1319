@@ -25,7 +25,7 @@ using namespace std;
         int instrNum;
         int paramCount;
 
-        symbolType* symbolType;
+        symbolType* symType;
         sym* symPtr;
         Array *A;
 
@@ -42,14 +42,13 @@ using namespace std;
 %token <char_value> CHARACTER_CONSTANT
 %token <char_value> STRING_LITERAL
 
-%token void char INT IF ELSE FOR RETURN 
+%token VOID CHAR INT IF ELSE FOR RETURN 
 %token L_SQUARE_BRACKET R_SQUARE_BRACKET L_ROUND_BRACKET R_ROUND_BRACKET L_CURLY_BRACKET R_CURLY_BRACKET 
 %token ARROW AMPERSAND ASTERISK PLUS MINUS DIVIDE MODULO NOT QUESTION 
 %token LESS_THAN GREATER_THAN LESS_THAN_EQUAL_TO GREATER_THAN_EQUAL_TO EQUAL_TO NOT_EQUAL_TO 
 %token LOGICAL_AND LOGICAL_OR ASSIGN COLON SEMICOLON COMMA INVALID_TOKEN
 
 %start translation_unit;
-
 
 /* ==================================== Type stuff  =============================================== */
 %type <unaryOp> unary_operator
@@ -77,7 +76,7 @@ using namespace std;
         block_item_list 
         block_item_list_opt
 
-%type <symbolType> pointer
+%type <symType> pointer
 %type <symPtr> initializer
 %type <symPtr> direct_declarator init_declarator declarator
 
@@ -108,40 +107,40 @@ N: %empty {
 primary_expression : IDENTIFIER 
                         {
 							$$ = new Expression();
-							updateNextInstr();
+							
 							$$ -> loc = $1;
-							updateNextInstr();
+							
 							$$->type = "not-boolean";
-							updateNextInstr();
+							
                         }
                     | INTEGER_CONSTANT 
 						{
 							$$=new Expression();	
-							updateNextInstr();
+							
 							string p=convertToString($1);
-							updateNextInstr();
+							
 							$$->loc=gentemp(new symbolType("int"),p);
-							updateNextInstr();
+							
 							emit("=",$$->loc->name,p);
-							updateNextInstr();
+							
 						}
 					| CHARACTER_CONSTANT
 						{
 							$$=new Expression();
-							updateNextInstr();
+							
 							$$->loc=gentemp(new symbolType("char"),$1);
-							updateNextInstr();
+							
 							emit("=",$$->loc->name,string($1));
-							updateNextInstr();
+							
 						}
                     | STRING_LITERAL    
                     {
                         $$=new Expression();
-                        updateNextInstr();
+                        
                         $$->loc=gentemp(new symbolType("ptr"),$1);
-                        updateNextInstr();
-                        $$->loc->type->arrtype=new symbolType("char");
-                        updateNextInstr();
+                        
+                        $$->loc->type->type=new symbolType("char");
+                        
                         
                     }
                     | L_ROUND_BRACKET expression R_ROUND_BRACKET
@@ -153,70 +152,70 @@ primary_expression : IDENTIFIER
 postfix_expression: primary_expression
                         {
                                 $$=new Array();
-                                updateNextInstr();
+                                
                                 $$->Array=$1->loc;	
-                                updateNextInstr();
+                                
                                 $$->type=$1->loc->type;	
-                                updateNextInstr();
+                                
                                 $$->loc=$$->Array;
-                                updateNextInstr();
+                                
                         }
 
                     | postfix_expression L_SQUARE_BRACKET expression R_SQUARE_BRACKET
                 { 	
                                 	 
 						$$=new Array();
-						updateNextInstr();
-						$$->type=$1->type->arrtype;				
+						
+						$$->type=$1->type->type;				
 
-						updateNextInstr();			
+									
 						$$->Array=$1->Array;						
 
-						updateNextInstr();
+						
 						$$->loc=gentemp(new symbolType("int"));		
 
-						updateNextInstr();
+						
 						$$->aType="arr";						
 
-						updateNextInstr();
+						
 						if($1->aType=="arr") 
 						{			
 							
 							sym* t=gentemp(new symbolType("int"));
-							updateNextInstr();
+							
 							int p=sizeOfType($$->type);
-							updateNextInstr();
+							
 							string str=convertToString(p);
-							updateNextInstr();
+							
 							emit("*",t->name,$3->loc->name,str);
-							updateNextInstr();	
+								
 							
 							emit("+",$$->loc->name,$1->loc->name,t->name);
-							updateNextInstr();
+							
 							
 						}
 						else 
 						{                        
 
 							int p=sizeOfType($$->type);
-							updateNextInstr();
+							
 							string str=convertToString(p);
-							updateNextInstr();
+							
 							emit("*",$$->loc->name,$3->loc->name,str);
-							updateNextInstr();
+							
 							
 						}
 	        }
                     | postfix_expression L_ROUND_BRACKET argument_expression_list_opt R_ROUND_BRACKET
                     {
                         $$=new Array();	
-                        updateNextInstr();
+                        
                         $$->Array=gentemp($1->type);
-                        updateNextInstr();
+                        
                         string str=convertToString($3);
-                        updateNextInstr();
+                        
                         emit("call",$$->Array->name,$1->Array->name,str);
-                        updateNextInstr();
+                        
                     }
                     | postfix_expression ARROW IDENTIFIER {  }/* pointer indirection only one level */
                     ;
@@ -228,16 +227,16 @@ argument_expression_list_opt: argument_expression_list  { $$=$1; }
 argument_expression_list: assignment_expression
                         {
                                 $$ = 1;
-                                updateNextInstr();
+                                
                                 emit("param",$1->loc->name);	
-                                updateNextInstr();
+                                
                         }
                         | argument_expression_list COMMA assignment_expression
                         {
                                 $$ = $1+1;
-                                updateNextInstr();
+                                
                                 emit("param",$3->loc->name);	
-                                updateNextInstr();
+                                
                         }
                         ;
 
@@ -246,7 +245,7 @@ unary_expression: postfix_expression { $$=$1; }
                 {			
 
                         $$=new Array();
-                        updateNextInstr();
+                        
                         switch($1)
                                 {	  
                                         case '+':  
@@ -254,39 +253,39 @@ unary_expression: postfix_expression { $$=$1; }
                                                 break;          
                                         case '-':				
                                                 $$->Array=gentemp(new symbolType($2->Array->type->type));
-                                                updateNextInstr();
+                                                
                                                 emit("uminus",$$->Array->name,$2->Array->name);
-                                                updateNextInstr();
+                                                
                                                 break; 
 
                                         case '!':			
                                                 $$->Array=gentemp(new symbolType($2->Array->type->type));
-                                                updateNextInstr();
+                                                
                                                 emit("!",$$->Array->name,$2->Array->name);
-                                                updateNextInstr();
+                                                
                                                 break;
 
 										case '&':                                       
 
 												
 												$$->Array=gentemp((new symbolType("ptr")));
-												updateNextInstr();
-												$$->Array->type->arrtype=$2->Array->type; 
-												updateNextInstr();
+												
+												$$->Array->type->type=$2->Array->type; 
+												
 												emit("=&",$$->Array->name,$2->Array->name);
-												updateNextInstr();
+												
 												break;
 												
 										case '*':                          
 
 											$$->aType="ptr";
-											updateNextInstr();
-											$$->loc=gentemp($2->Array->type->arrtype);
-											updateNextInstr();
+											
+											$$->loc=gentemp($2->Array->type->type);
+											
 											$$->Array=$2->Array;
-											updateNextInstr();
+											
 											emit("=*",$$->loc->name,$2->Array->name);
-											updateNextInstr();
+											
 											
 											break;
 						
@@ -297,27 +296,27 @@ unary_expression: postfix_expression { $$=$1; }
 unary_operator: AMPERSAND
                 {
                         $$ = '&';
-						updateNextInstr();
+						
                 }
                 | ASTERISK
                 {
                         $$ = '*';
-						updateNextInstr();
+						
                 }
                 | PLUS
                 {
                         $$ = '+';
-						updateNextInstr();
+						
                 }
                 | MINUS   
                 {
                         $$ = '-';
-						updateNextInstr();
+						
                 }
                 | NOT 
                 {
                         $$ = '!';
-						updateNextInstr();
+						
                 }
                 ;
 
@@ -325,14 +324,14 @@ multiplicative_expression: unary_expression
                            {
 		 
 								$$ = new Expression();             
-								updateNextInstr();						    
+														    
 								if($1->aType=="arr") 			  
 								{
 									$$->loc = gentemp($1->loc->type);	
-									updateNextInstr();
+									
 									emit("=[]", $$->loc->name, $1->Array->name, $1->loc->name);     
 
-									updateNextInstr();
+									
 									
 								}
 								else if($1->aType=="ptr")         
@@ -340,13 +339,13 @@ multiplicative_expression: unary_expression
 								{ 
 									$$->loc = $1->loc;        
 
-									updateNextInstr();
+									
 									
 								}
 								else
 								{
 									$$->loc = $1->Array;
-									updateNextInstr();
+									
 									
 								}
 							}
@@ -359,11 +358,11 @@ multiplicative_expression: unary_expression
 									else 								 
 									{
 										$$ = new Expression();	
-										updateNextInstr();
+										
 										$$->loc = gentemp(new symbolType($1->loc->type->type));
-										updateNextInstr();
+										
 										emit("*", $$->loc->name, $1->loc->name, $3->Array->name);
-										updateNextInstr();
+										
 										
 									}
 								}
@@ -375,11 +374,11 @@ multiplicative_expression: unary_expression
 									else    
 									{
 										$$ = new Expression();
-										updateNextInstr();
+										
 										$$->loc = gentemp(new symbolType($1->loc->type->type));
-										updateNextInstr();
+										
 										emit("/", $$->loc->name, $1->loc->name, $3->Array->name);
-										updateNextInstr();	
+											
 																
 									}
 								}
@@ -391,11 +390,11 @@ multiplicative_expression: unary_expression
 									else 		
 									{
 										$$ = new Expression();
-										updateNextInstr();
+										
 										$$->loc = gentemp(new symbolType($1->loc->type->type));
-										updateNextInstr();
+										
 										emit("%", $$->loc->name, $1->loc->name, $3->Array->name);	
-										updateNextInstr();	
+											
 											
 									}
 								}
@@ -413,11 +412,11 @@ additive_expression: multiplicative_expression  /* these are left associative */
 							else    
 							{
 								$$ = new Expression();	
-								updateNextInstr();
+								
 								$$->loc = gentemp(new symbolType($1->loc->type->type));
-								updateNextInstr();
+								
 								emit("+", $$->loc->name, $1->loc->name, $3->loc->name);
-								updateNextInstr();
+								
 								
 							}
 						}             
@@ -429,11 +428,11 @@ additive_expression: multiplicative_expression  /* these are left associative */
 							else       
 							{	
 								$$ = new Expression();	
-								updateNextInstr();
+								
 								$$->loc = gentemp(new symbolType($1->loc->type->type));
-								updateNextInstr();
+								
 								emit("-", $$->loc->name, $1->loc->name, $3->loc->name);
-								updateNextInstr();
+								
 								
 							}
 						}         
@@ -455,22 +454,22 @@ relational_expression: additive_expression      /* these are left associative */
 
 																
 									$$ = new Expression();
-									updateNextInstr();
+									
 									$$->type = "bool";                         
 
-									updateNextInstr();		
+											
 									$$->trueList = makelist(nextInstr());     
 
-									updateNextInstr();
+									
 									$$->falseList = makelist(nextInstr()+1);
-									updateNextInstr();
+									
 									emit("<", "", $1->loc->name, $3->loc->name);     
 
-									updateNextInstr();
+									
 									
 									emit("goto", "");	
 
-									updateNextInstr();
+									
 									
 								}
 							}         
@@ -485,18 +484,18 @@ relational_expression: additive_expression      /* these are left associative */
 								{
 									
 									$$ = new Expression();	
-									updateNextInstr();
+									
 									$$->type = "bool";
-									updateNextInstr();
+									
 									$$->trueList = makelist(nextInstr());
-									updateNextInstr();
+									
 									$$->falseList = makelist(nextInstr()+1);
-									updateNextInstr();
+									
 									emit(">", "", $1->loc->name, $3->loc->name);
-									updateNextInstr();
+									
 									
 									emit("goto", "");
-									updateNextInstr();
+									
 									
 								}	
 							}    
@@ -511,18 +510,18 @@ relational_expression: additive_expression      /* these are left associative */
 								{		
 									
 									$$ = new Expression();		
-									updateNextInstr();
+									
 									$$->type = "bool";
-									updateNextInstr();
+									
 									$$->trueList = makelist(nextInstr());
-									updateNextInstr();
+									
 									$$->falseList = makelist(nextInstr()+1);
-									updateNextInstr();
+									
 									emit("<=", "", $1->loc->name, $3->loc->name);
-									updateNextInstr();
+									
 									
 									emit("goto", "");
-									updateNextInstr();
+									
 									
 								}		
 							}  
@@ -537,18 +536,18 @@ relational_expression: additive_expression      /* these are left associative */
 								{
 									
 									$$ = new Expression();
-									updateNextInstr();
+									
 									$$->type = "bool";
-									updateNextInstr();
+									
 									$$->trueList = makelist(nextInstr());
-									updateNextInstr();
+									
 									$$->falseList = makelist(nextInstr()+1);
-									updateNextInstr();
+									
 									emit(">=", "", $1->loc->name, $3->loc->name);
-									updateNextInstr();
+									
 									
 									emit("goto", "");
-									updateNextInstr();
+									
 									
 								}
 							}
@@ -571,24 +570,24 @@ equality_expression: relational_expression      /* these are left associative */
 							
 							convertBool2Int($1);                  
 
-							updateNextInstr();	
+								
 							convertBool2Int($3);
-							updateNextInstr();
+							
 							$$ = new Expression();
-							updateNextInstr();
+							
 							$$->type = "bool";
-							updateNextInstr();
+							
 							$$->trueList = makelist(nextInstr());            
 
-							updateNextInstr();
+							
 							$$->falseList = makelist(nextInstr()+1); 
-							updateNextInstr();
+							
 							emit("==", "", $1->loc->name, $3->loc->name);      
 
-							updateNextInstr();
+							
 							emit("goto", "");				
 
-							updateNextInstr();
+							
 							
 						}
 						
@@ -604,23 +603,23 @@ equality_expression: relational_expression      /* these are left associative */
 						{			
 							
 							convertBool2Int($1);	
-							updateNextInstr();
+							
 							convertBool2Int($3);
-							updateNextInstr();
+							
 							$$ = new Expression();                 
 
-							updateNextInstr();
+							
 							$$->type = "bool";
-							updateNextInstr();
+							
 							$$->trueList = makelist(nextInstr());
-							updateNextInstr();
+							
 							$$->falseList = makelist(nextInstr()+1);
-							updateNextInstr();
+							
 							emit("!=", "", $1->loc->name, $3->loc->name);
-							updateNextInstr();
+							
 							
 							emit("goto", "");
-							updateNextInstr();
+							
 							
 						}
 					}        
@@ -632,27 +631,27 @@ logical_AND_expression: equality_expression  { $$=$1; }	   /* these are left ass
 		 
 							convertInt2Bool($5);         
 
-							updateNextInstr();
+							
 							backpatch($2->nextList, nextInstr());        
 
-							updateNextInstr();
+							
 							convertInt2Bool($1);                  
 
-							updateNextInstr();
+							
 							$$ = new Expression();     
 
-							updateNextInstr();
+							
 							$$->type = "bool";
-							updateNextInstr();
+							
 							backpatch($1->trueList, $4);        
 
-							updateNextInstr();
+							
 							$$->trueList = $5->trueList;        
 
-							updateNextInstr();
+							
 							$$->falseList = merge($1->falseList, $5->falseList);    
 
-							updateNextInstr();
+							
 							
 						}    
                         ;   
@@ -666,27 +665,27 @@ logical_OR_expression: logical_AND_expression   /* these are left associative */
 							
 							convertInt2Bool($5);			 
 
-							updateNextInstr();
+							
 							backpatch($2->nextList, nextInstr());	
 
-							updateNextInstr();
+							
 							convertInt2Bool($1);			
 
-							updateNextInstr();
+							
 							$$ = new Expression();			
 
-							updateNextInstr();
+							
 							$$->type = "bool";
-							updateNextInstr();
+							
 							backpatch($1->falseList, $4);		
 
-							updateNextInstr();
+							
 							$$->trueList = merge($1->trueList, $5->trueList);		
 
-							updateNextInstr();
+							
 							$$->falseList = $5->falseList;		 	
 
-							updateNextInstr();
+							
 							
 						}
                         ;
@@ -700,49 +699,49 @@ conditional_expression: logical_OR_expression   /* these are right associative *
 							
 							$$->loc = gentemp($5->loc->type);       
 
-							updateNextInstr();
+							
 							$$->loc->update($5->loc->type);
-							updateNextInstr();
+							
 							emit("=", $$->loc->name, $9->loc->name);      
 
-							updateNextInstr();
+							
 							
 							list<int> l = makelist(nextInstr());        
 
 							emit("goto", "");              
 
-							updateNextInstr();
+							
 							
 							backpatch($6->nextList, nextInstr());        
 
-							updateNextInstr();
+							
 							emit("=", $$->loc->name, $5->loc->name);
-							updateNextInstr();
+							
 							
 							list<int> m = makelist(nextInstr());         
 
-							updateNextInstr();
+							
 							l = merge(l, m);						
 
-							updateNextInstr();
+							
 							emit("goto", "");						
 
-							updateNextInstr();
+							
 							
 							backpatch($2->nextList, nextInstr());   
 
-							updateNextInstr();
+							
 							convertInt2Bool($1);                   
 
-							updateNextInstr();
+							
 							backpatch($1->trueList, $4);           
 
-							updateNextInstr();
+							
 							backpatch($1->falseList, $8);          
 
-							updateNextInstr();
+							
 							backpatch(l, nextInstr());
-							updateNextInstr();
+							
 							
 						}
                         ;
@@ -758,16 +757,16 @@ assignment_expression: conditional_expression   /* these are right associative *
 								{
 									
 									$3->loc = convertType($3->loc, $1->aType);
-									updateNextInstr();
+									
 									emit("[]=", $1->Array->name, $1->loc->name, $3->loc->name);		
-									updateNextInstr();
+									
 									
 								}
 								else if($1->aType=="ptr")     
 								{
 									
 									emit("*=", $1->Array->name, $3->loc->name);		
-									updateNextInstr();
+									
 									
 								}
 								else                              
@@ -776,7 +775,7 @@ assignment_expression: conditional_expression   /* these are right associative *
 									
 									$3->loc = convertType($3->loc, $1->Array->type->type);
 									emit("=", $1->Array->name, $3->loc->name);
-									updateNextInstr();
+									
 									
 								}
 								
@@ -805,13 +804,13 @@ init_declarator: declarator {$$=$1;}
 					if($3->val!="") $1->val=$3->val;        
 
 					emit("=", $1->name, $3->name);
-					updateNextInstr();
+					
 					
 				}
                 ;
 
-type_specifier: void    {var_type="void";}
-                | char  { var_type="char"; }
+type_specifier: VOID    {var_type="void";}
+                | CHAR  { var_type="char"; }
                 | INT   { var_type="int"; }
 
                 ;
@@ -820,16 +819,16 @@ declarator: pointer direct_declarator
 			{
 				
 				symbolType *t = $1;
-				updateNextInstr();
-				while(t->arrtype!=NULL) t = t->arrtype;           
+				
+				while(t->type!=NULL) t = t->type;           
 
-				updateNextInstr();
-				t->arrtype = $2->type;                
+				
+				t->type = $2->type;                
 
-				updateNextInstr();
+				
 				$$ = $2->update($1);                  
 
-				updateNextInstr();
+				
 				
 			}
         	| direct_declarator { }
@@ -839,9 +838,9 @@ direct_declarator: IDENTIFIER
 					{
 						
 						$$ = $1->update(new symbolType(var_type));
-						updateNextInstr();
+						
 						currentSymbol = $$;
-						updateNextInstr();
+						
 						
 						
 					}
@@ -849,38 +848,38 @@ direct_declarator: IDENTIFIER
 					{
 						
 						symbolType *t = $1 -> type;
-						updateNextInstr();
+						
 						symbolType *prev = NULL;
-						updateNextInstr();
+						
 						while(t->type == "arr") 
 						{
 							prev = t;	
-							t = t->arrtype;      
+							t = t->type;      
 
-							updateNextInstr();
+							
 						}
 						if(prev==NULL) 
 						{
 							
 							int temp = atoi($3->loc->val.c_str());      
 
-							updateNextInstr();
+							
 							symbolType* s = new symbolType("arr", $1->type, temp);        
 
-							updateNextInstr();
+							
 							$$ = $1->update(s);   
 
-							updateNextInstr();
+							
 							
 						}
 						else 
 						{
 							
-							prev->arrtype =  new symbolType("arr", t, atoi($3->loc->val.c_str()));     
+							prev->type =  new symbolType("arr", t, atoi($3->loc->val.c_str()));     
 
-							updateNextInstr();
+							
 							$$ = $1->update($1->type);
-							updateNextInstr();
+							
 							
 						}
 					}
@@ -888,57 +887,57 @@ direct_declarator: IDENTIFIER
 					{
 						
 						symbolType *t = $1 -> type;
-						updateNextInstr();
+						
 						symbolType *prev = NULL;
-						updateNextInstr();
+						
 						while(t->type == "arr") 
 						{
 							prev = t;	
-							t = t->arrtype;         
+							t = t->type;         
 
-							updateNextInstr();
+							
 						}
 						if(prev==NULL) 
 						{
 							
 							symbolType* s = new symbolType("arr", $1->type, 0);    
 
-							updateNextInstr();
+							
 							$$ = $1->update(s);
-							updateNextInstr();
+							
 								
 						}
 						else 
 						{
 							
-							prev->arrtype =  new symbolType("arr", t, 0);
-							updateNextInstr();
+							prev->type =  new symbolType("arr", t, 0);
+							
 							$$ = $1->update($1->type);
-							updateNextInstr();
+							
 							
 						}
 					}
 					| direct_declarator L_ROUND_BRACKET changetable parameter_list_opt R_ROUND_BRACKET  
 					{
 						table->name = $1->name;
-						updateNextInstr();
+						
 						if($1->type->type !="void") 
 						{
 							sym *s = table->lookup("return");         
 
 							s->update($1->type);
-							updateNextInstr();
+							
 							
 						}
 						$1->nested=table;       
-						updateNextInstr();	
+							
 						table->parent = globalST;
-						updateNextInstr();
+						
 						changeTable(globalST);				
 
-						updateNextInstr();
+						
 						currentSymbol = $$;
-						updateNextInstr();
+						
 						
 					}
 					| L_ROUND_BRACKET declarator R_ROUND_BRACKET { $$ = $2; }
@@ -951,15 +950,15 @@ changetable: %empty
 				{
 					
 					changeTable(new symTable(""));	
-					updateNextInstr();
+					
 				}
 				else 
 				{
 					
 					changeTable(currentSymbol->nested);						
-					updateNextInstr();
+					
 					emit("label", table->name);
-					updateNextInstr();
+					
 					
 				}
 			}
@@ -968,13 +967,13 @@ changetable: %empty
 pointer: ASTERISK   
 	{ 
 		$$ = new symbolType("ptr");
-		updateNextInstr();
+		
 		  
 	}
 	| pointer ASTERISK
 	{
 		$$ = new symbolType("ptr", $1);
-		updateNextInstr();
+		
 	}
         ;
 
@@ -1058,43 +1057,43 @@ selection_statement: IF L_ROUND_BRACKET expression N R_ROUND_BRACKET M Statement
 						{
 							backpatch($4->nextList, nextInstr());        
 
-							updateNextInstr();
+							
 							convertInt2Bool($3);         
 
-							updateNextInstr();
+							
 							$$ = new Statement();        
 
-							updateNextInstr();
+							
 							backpatch($3->trueList, $6);        
 
-							updateNextInstr();
+							
 							list<int> temp = merge($3->falseList, $7->nextList);   
 
-							updateNextInstr();
+							
 							$$->nextList = merge($8->nextList, temp);
-							updateNextInstr();
+							
 						}
                     | IF L_ROUND_BRACKET expression N R_ROUND_BRACKET M Statement N ELSE M Statement  
 						{
 							backpatch($4->nextList, nextInstr());		
 
-							updateNextInstr();
+							
 							convertInt2Bool($3);        
 
-							updateNextInstr();
+							
 							$$ = new Statement();       
 
-							updateNextInstr();
+							
 							backpatch($3->trueList, $6);    
 
-							updateNextInstr();
+							
 							backpatch($3->falseList, $10);
-							updateNextInstr();
+							
 							list<int> temp = merge($7->nextList, $8->nextList);       
 
-							updateNextInstr();
+							
 							$$->nextList = merge($11->nextList,temp);	
-							updateNextInstr();
+							
 						}
                     ;
 
@@ -1103,28 +1102,28 @@ iteration_statement: FOR L_ROUND_BRACKET expression_statement M expression_state
 						
 						$$ = new Statement();		 
 
-						updateNextInstr();
+						
 						convertInt2Bool($5);  
 
-						updateNextInstr();
+						
 						backpatch($5->trueList, $10);	
 
-						updateNextInstr();
+						
 						backpatch($8->nextList, $4);	
 
-						updateNextInstr();
+						
 						backpatch($11->nextList, $6);	
 
-						updateNextInstr();
+						
 						string str=convertToString($6);
-						updateNextInstr();
+						
 						emit("goto", str);				
 
-						updateNextInstr();
+						
 						
 						$$->nextList = $5->falseList;	
 
-						updateNextInstr();
+						
 							
 					}
                     ;
@@ -1132,16 +1131,16 @@ iteration_statement: FOR L_ROUND_BRACKET expression_statement M expression_state
 jump_statement: RETURN expression SEMICOLON
 				{
 					$$ = new Statement();
-					updateNextInstr();
+					
 					emit("return",$2->loc->name);  
-					updateNextInstr();
+					
 				}
 				| RETURN SEMICOLON
 				{
 					$$ = new Statement();
-					updateNextInstr();
+					
 					emit("return", "");
-					updateNextInstr();
+					
 				}
                 ;
 
@@ -1160,11 +1159,11 @@ function_definition: type_specifier declarator declaration_list_opt changetable 
 					{
 						
 						int nextInstr=0;	 
-						updateNextInstr();
+						
 						table->parent=globalST;
-						updateNextInstr();
+						
 						changeTable(globalST);                    
-						updateNextInstr();
+						
 						
 					}
 					;

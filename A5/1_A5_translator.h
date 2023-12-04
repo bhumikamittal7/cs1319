@@ -105,7 +105,7 @@ struct Array
 extern quadArray q;
 extern symTable *table; // Current Symbbol Table - changing name here - last time something was messed up
 extern sym *currentSymbol;
-extern symTable *globalTable;
+extern symTable *globalST;
 /*=========================================================================================*/
 
 int nextInstr();

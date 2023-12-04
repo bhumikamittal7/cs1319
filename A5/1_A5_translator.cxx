@@ -10,7 +10,7 @@ quadArray q;
 string Type;                                                                            
 symTable * table;                                                                       
 sym * currentSymbol;                                                                    
-symTable * globalTable;                                                                 
+symTable * globalST;                                                                 
 /*=========================================================================================*/
 
 symbolType::symbolType(string type, symbolType *ptr, int width):
@@ -65,22 +65,29 @@ void quad::print()
 	
     
 
-	else if (op == "ADD") std::cout << result << " = " << arg1 << " + " << arg2;
-	else if (op == "SUB") std::cout << result << " = " << arg1 << " - " << arg2;
-	else if (op == "MULT") std::cout << result << " = " << arg1 << " *" << arg2;
+	else if (op == "PLUS") std::cout << result << " = " << arg1 << " + " << arg2;
+	else if (op == "MINUS") std::cout << result << " = " << arg1 << " - " << arg2;
+	else if (op == "ASTERISK") std::cout << result << " = " << arg1 << " *" << arg2;
 	else if (op == "DIVIDE") std::cout << result << " = " << arg1 << " / " << arg2;
-	else if (op == "MODOP") std::cout << result << " = " << arg1 << " % " << arg2;
+	else if (op == "MODULO") std::cout << result << " = " << arg1 << " % " << arg2;
 
-    else if (op == "EQOP") std::cout << "if " << arg1 << " == " << arg2 << " goto " << result;
-	else if (op == "NEOP") std::cout << "if " << arg1 << " != " << arg2 << " goto " << result;
-	else if (op == "LT") std::cout << "if " << arg1 << "<" << arg2 << " goto " << result;
-	else if (op == "GT") std::cout << "if " << arg1 << " > " << arg2 << " goto " << result;
-	else if (op == "GE") std::cout << "if " << arg1 << " >= " << arg2 << " goto " << result;
-	else if (op == "LE") std::cout << "if " << arg1 << " <= " << arg2 << " goto " << result;
-	else if (op == "GOTOOP") std::cout << "goto " << result;
+    
+
+    else if (op == "EQUAL_TO") std::cout << "if " << arg1 << " == " << arg2 << " goto " << result;
+	else if (op == "NOT_EQUAL_TO") std::cout << "if " << arg1 << " != " << arg2 << " goto " << result;
+	else if (op == "LESS_THAN") std::cout << "if " << arg1 << "<" << arg2 << " goto " << result;
+	else if (op == "GREATER_THAN") std::cout << "if " << arg1 << " > " << arg2 << " goto " << result;
+	else if (op == "GREATER_THAN_EQUAL_TO") std::cout << "if " << arg1 << " >= " << arg2 << " goto " << result;
+	else if (op == "LESS_THAN_EQUAL_TO") std::cout << "if " << arg1 << " <= " << arg2 << " goto " << result;
+    else if (op == "LOGICAL_AND") std::cout << "if " << arg1 << " && " << arg2 << " goto " << result;
+    else if (op == "LOGICAL_OR") std::cout << "if " << arg1 << " || " << arg2 << " goto " << result;
+
+	else if (op == "GOTO") std::cout << "goto " << result;
+
+    
 
 	else if (op == "UMINUS") std::cout << result << " = -" << arg1;
-	else if (op == "LNOT") std::cout << result << " = !" << arg1;
+    else if (op == "!") std::cout << result << " = !" << arg1;
 
 	else if (op == "ARRR") std::cout << result << " = " << arg1 << "[" << arg2 << "]";
 	else if (op == "ARRL") std::cout << result << "[" << arg1 << "]" << " = " << arg2;
