@@ -2,7 +2,7 @@
 %{
 #include <string>
 #include <stdio.h>
-#include "1_A4_translator.h"
+#include "1_A5_translator.h"
 #include <iostream>              
 #include <cstdlib>
 #include <sstream>

@@ -3,11 +3,11 @@
 
     #include <stdio.h>  
 	#include <string.h>
-    #include "1_A4_translator.h"
+    #include "1_A5_translator.h"
 
     /*added here ends*/
     
-    #include "1_A4.tab.h"
+    #include "1_A5.tab.h"
 
 
 %}

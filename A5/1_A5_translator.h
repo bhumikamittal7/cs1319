@@ -1,5 +1,5 @@
-#ifndef __1_A4_TRANSLATOR_H
-#define __1_A4_TRANSLATOR_H
+#ifndef __1_A5_TRANSLATOR_H
+#define __1_A5_TRANSLATOR_H
 
 #include <bits/stdc++.h>
 
@@ -159,7 +159,7 @@ voidSym changeTable(symTable *);
 voidSym emit(stringSym, stringSym, stringSym arg1 = "", stringSym arg2 = "");
 voidSym emit(stringSym, stringSym, int, stringSym arg2 = "");
 
-#endif // __1_A4_TRANSLATOR_H
+#endif // __1_A5_TRANSLATOR_H
 
 // =====================================================================================================
 // Reference - I read through multiple tinyC compiler stuff to understand how their thing is implemented.
