@@ -1,533 +1,388 @@
 #include "1_A5_translator.h"
 #include <string>
-#include <sstream>  //this is for the stringstream which allows us to use the >> operator
-#include <iostream> //this is for the cout and cerr
+#include <sstream>  
+#include <iostream> 
 
 using namespace std;
 
 /*=========================================================================================*/
-// Global Variables
-symTable *ST;             // current Symbol Table
-symTable *globalST;       // Global Symbol Table
-sym *currentSymbol;       // current Symbol
-quadArray quadArr;        // Quad Array
-basicType bType;          // Basic Type
-long long int instrCount; // Instruction Count
-string var_type;          // this is for the variable type
+quadArray q;                                                                            
+string Type;                                                                            
+symTable * table;                                                                       
+sym * currentSymbol;                                                                    
+symTable * globalTable;                                                                 
 /*=========================================================================================*/
-// Stupid but useful functions
-void updateNextInstr()
+
+symbolType::symbolType(string type, symbolType *ptr, int width):
+	type(type),
+	ptr(ptr),
+	width(width) {};
+/*=========================================================================================*/
+
+quad::quad(string result, string arg1, string op, string arg2):
+	result(result), arg1(arg1), arg2(arg2), op(op) {};                                  
+
+
+quad::quad(string result, int arg1, string op, string arg2):
+	result(result), arg2(arg2), op(op)                                                  
+	{
+		stringstream strs;                                                              
+		strs << arg1;                                                                   
+		string temp_str = strs.str();                                                   
+		char *intStr = (char*) temp_str.c_str();                                        
+		string str = string(intStr);                                                    
+		this->arg1 = str;                                                               
+	}
+/*=========================================================================================*/
+void changeTable(symTable *newtable)
 {
-    instrCount = instrCount + 1;
+	
+	table = newtable;
 }
 
 int nextInstr()
 {
-    return quadArr.Array.size();
+	return q.Array.size();
 }
 
-void addSpaces(int n)
-{
-    for (int i = 0; i < n; i++)
-        cout << " ";
-}
-
-void changeTable(symTable *nTable)
-{
-    ST = nTable;
-}
 
 int sizeOfType(symbolType *t)
 {
-    if (t->type.compare("void") == 0)
-        return bType.size[1];
-    else if (t->type.compare("char") == 0)
-        return size_of_char;
-    else if (t->type.compare("int") == 0)
-        return size_of_int;
-    else if (t->type.compare("arr") == 0)
-        return t->width * sizeOfType(t->arrtype);
-    else if (t->type.compare("ptr") == 0)
-        return size_of_pointer;
-    else if (t->type.compare("func") == 0)
-        return bType.size[6];
-    else
-        return -1;
+	if (t->type == "void") return 0;
+	else if (t->type == "arr") return t->width* sizeOfType(t->ptr);
+	else if (t->type == "ptr") return size_of_pointer;
+	else if (t->type == "char") return size_of_char;
+	else if (t->type == "func") return 0;
+	else if (t->type == "int") return size_of_int;
+	return -1;
 }
-
-string printType(symbolType *t)
-{
-    if (t == NULL)
-        return bType.type[0];
-    else if (t->type.compare("void") == 0)
-        return bType.type[1];
-    else if (t->type.compare("char") == 0)
-        return bType.type[2];
-    else if (t->type.compare("int") == 0)
-        return bType.type[3];
-    else if (t->type.compare("ptr") == 0)
-        return bType.type[4] + "(" + printType(t->arrtype) + ")";
-    else if (t->type.compare("arr") == 0)
-        return bType.type[5] + "(" + convertToString(t->width) + "," + printType(t->arrtype) + ")";
-    else if (t->type.compare("func") == 0)
-        return bType.type[6];
-    else
-        return "Type not found";
-}
-
-// Print the Quad Type 1
-void quad::printType1()
-{
-    cout << result << " = " << arg1 << " " << op << " " << arg2;
-}
-
-// Print the Quad Type 2
-void quad::printType2()
-{
-    cout << "if " << arg1 << " " << op << " " << arg2 << " goto " << result;
-}
-
 /*=========================================================================================*/
-// Symbol Table Entry
-sym::sym(string name, string t, symbolType *arrtype, int width)
+
+void quad::print()
 {
-    (*this).name = name;
-    type = new symbolType(t, arrtype, width);
-    size = sizeOfType(type);
-    offset = 0;
-    nested = NULL;
-    val = "-";
+		
+	if (op == "=") std::cout << result << " = " << arg1;
+	
+    
+
+	else if (op == "ADD") std::cout << result << " = " << arg1 << " + " << arg2;
+	else if (op == "SUB") std::cout << result << " = " << arg1 << " - " << arg2;
+	else if (op == "MULT") std::cout << result << " = " << arg1 << " *" << arg2;
+	else if (op == "DIVIDE") std::cout << result << " = " << arg1 << " / " << arg2;
+	else if (op == "MODOP") std::cout << result << " = " << arg1 << " % " << arg2;
+
+    else if (op == "EQOP") std::cout << "if " << arg1 << " == " << arg2 << " goto " << result;
+	else if (op == "NEOP") std::cout << "if " << arg1 << " != " << arg2 << " goto " << result;
+	else if (op == "LT") std::cout << "if " << arg1 << "<" << arg2 << " goto " << result;
+	else if (op == "GT") std::cout << "if " << arg1 << " > " << arg2 << " goto " << result;
+	else if (op == "GE") std::cout << "if " << arg1 << " >= " << arg2 << " goto " << result;
+	else if (op == "LE") std::cout << "if " << arg1 << " <= " << arg2 << " goto " << result;
+	else if (op == "GOTOOP") std::cout << "goto " << result;
+
+	else if (op == "UMINUS") std::cout << result << " = -" << arg1;
+	else if (op == "LNOT") std::cout << result << " = !" << arg1;
+
+	else if (op == "ARRR") std::cout << result << " = " << arg1 << "[" << arg2 << "]";
+	else if (op == "ARRL") std::cout << result << "[" << arg1 << "]" << " = " << arg2;
+	else if (op == "RETURN") std::cout << "ret " << result;
+	else if (op == "PARAM") std::cout << "param " << result;
+	else if (op == "CALL") std::cout << result << " = " << "call " << arg1 << ", " << arg2;
+	else if (op == "FUNC") std::cout << result << ": ";
+	else if (op == "FUNCEND") std::cout << "";
+    
+	else std::cout << "op";
+	std::cout << endl;
+}
+/*=========================================================================================*/
+
+void quadArray::print()
+{
+	std::cout << setw(30) << setfill('=') << "=" << endl;
+	std::cout << "Quad Translation" << endl;
+	std::cout << setw(30) << setfill('-') << "-" << setfill(' ') << endl;
+	for (vector<quad>::iterator it = Array.begin(); it != Array.end(); it++)
+	{
+		if (it->op == "func")
+		{
+			std::cout << "\n";
+			it->print();
+			std::cout << "\n";
+		}
+		else if (it->op == "FUNCEND") {}
+		else
+		{
+			std::cout << "\t" << setw(4) << it - Array.begin() << ":\t";
+			it->print();
+		}
+	}
+
+	std::cout << setw(30) << setfill('-') << "-" << endl;
+}
+/*=========================================================================================*/
+sym::sym(string name, string t, symbolType *ptr, int width): name(name)
+{
+	type = new symbolType(t, ptr, width);
+	nested = NULL;
+	val = "";
+	category = "";
+	offset = 0;
+	size = sizeOfType(type);
 }
 
 sym *sym::update(symbolType *t)
 {
-    type = t;
-    (*this).size = sizeOfType(t);
-    return this;
+	type = t;
+	this->size = sizeOfType(t);
+	return this;
 }
 
-// Symbol Type
-symbolType::symbolType(string type, symbolType *arrtype, int width)
-{
-    (*this).type = type;
-    (*this).width = width;
-    (*this).arrtype = arrtype;
-}
+symTable::symTable(string name): name(name), tempCount(0) {}
 
-// Symbol Table
-symTable::symTable(string name)
-{
-    (*this).name = name;
-    tempCount = 0;
-}
-
-// basic idea: we will iterate through the list of symbols and if we find the symbol, we will return it
-// if we don't find it, we will create a new symbol, push it into the list and return it
-sym *symTable::lookup(string name)
-{
-    sym *symbol;
-    listIterator it;
-    it = table.begin();
-    while (it != table.end())
-    {
-        if (it->name == name)
-        {
-            return &(*it);
-        }
-        it++;
-    }
-
-    symbol = new sym(name);
-    table.push_back(*symbol);
-    return &table.back();
-}
-
-// to update the symbol table
-void symTable::update()
-{
-    list<symTable *> tableList; // this is a list of symbol tables
-    int off;
-    listIterator it;
-
-    it = table.begin();
-    while (it != table.end())
-    {
-        if (it == table.begin())
-        {
-            it->offset = 0;
-            off = it->size;
-        }
-        else
-        {
-            it->offset = off;
-            off = it->offset + it->size;
-        }
-        if (it->nested != NULL)
-        {
-            tableList.push_back(it->nested);
-        }
-        it++;
-    }
-
-    list<symTable *>::iterator it1;
-    it1 = tableList.begin();
-    while (it1 != tableList.end())
-    {
-        (*it1)->update();
-        it1++;
-    }
-}
-
-// to print the symbol table - found this formatting online so this part of the code is kinda inspired (my formatting wasn't this neat) - though the code is written by me (only style is copied)
 void symTable::print()
 {
-    int nextInstr = 0;
-    list<symTable *> tableList;
+	list<symTable*> tablelist;
+	std::cout << setw(120) << setfill('=') << "=" << endl;
+	std::cout << "Symbol Table: " << setfill(' ') << left << setw(50) << this->name;
+	std::cout << right << setw(25) << "Parent: ";
+	if (this->parent != NULL)
+		std::cout << this->parent->name;
+	else std::cout << "null";
+	std::cout << endl;
+	std::cout << setw(120) << setfill('-') << "-" << endl;
+	std::cout << setfill(' ') << left << setw(15) << "Name";
+	std::cout << left << setw(25) << "Type";
+	std::cout << left << setw(15) << "Category";
+	std::cout << left << setw(30) << "Initial Value";
+	std::cout << left << setw(12) << "Size";
+	std::cout << left << setw(12) << "Offset";
+	std::cout << left << "Nested" << endl;
+	std::cout << setw(120) << setfill('-') << "-" << setfill(' ') << endl;
 
-    for (int i = 0; i < 60; i++)
-        cout << "__";
-    cout << endl;
+	for (list<sym>::iterator it = table.begin(); it != table.end(); it++)
+	{
+		std::cout << left << setw(15) << it->name;
+		string stype = printType(it->type);
+		std::cout << left << setw(25) << stype;
+		std::cout << left << setw(15) << it->category;
+		std::cout << left << setw(30) << it->val;
+		std::cout << left << setw(12) << it->size;
+		std::cout << left << setw(12) << it->offset;
+		std::cout << left;
+		if (it->nested == NULL)
+		{
+			std::cout << "null" << endl;
+		}
+		else
+		{
+			std::cout << it->nested->name << endl;
+			tablelist.push_back(it->nested);
+		}
+	}
 
-    cout << "Table Name: " << (*this).name << "\t\t\t\t\t\t Parent Name: ";
-
-    if ((*this).parent != NULL)
-        cout << (*this).parent->name << endl;
-    else
-        cout << "NULL" << endl;
-
-    for (int i = 0; i < 60; i++)
-        cout << "__";
-    cout << endl;
-
-    cout << "Name";             addSpaces(15);
-    cout << "Type";             addSpaces(15);
-    cout << "Initial Value";    addSpaces(15);
-    cout << "Size";             addSpaces(15);
-    cout << "Offset";           addSpaces(15);
-    cout << "Nested";           addSpaces(20);
-    cout << endl;
-
-    ostringstream str1; // this is for the string stream
-
-    for (listIterator it = table.begin(); it != table.end(); it++)
-    {
-        cout << it->name;
-        addSpaces(18 - it->name.length());
-
-        string typeResult = printType(it->type);
-        cout << typeResult;
-        addSpaces(23 - typeResult.length());
-
-        cout << it->val;
-        addSpaces(26 - it->val.length());
-
-        cout << it->size;
-        str1 << it->size;
-        addSpaces(20 - str1.str().length());
-
-        str1.str("");
-        str1.clear();
-        cout << it->offset;
-        str1 << it->offset;
-        addSpaces(20 - str1.str().length());
-
-        str1.str("");
-        str1.clear();
-        if (it->nested != NULL)
-        {
-            cout << it->nested->name;
-            tableList.push_back(it->nested);
-        }
-        else
-            cout << "NULL";
-        addSpaces(20);
-        cout << endl;
-    }
-
-    for (int i = 0; i < 120; i++)
-        cout << "-";
-    cout << "\n";
-
-    for (list<symTable *>::iterator it1 = tableList.begin(); it1 != tableList.end(); it1++)
-    {
-        (*it1)->print();
-    }
-}
-
-/*=========================================================================================*/
-// Quad
-quad::quad(string result, string arg1, string op, string arg2)
-{
-    (*this).result = result;
-    (*this).arg1 = arg1;
-    (*this).op = op;
-    (*this).arg2 = arg2;
-}
-
-quad::quad(string result, int arg1, string op, string arg2)
-{
-    (*this).result = result;
-    (*this).arg2 = arg2;
-    (*this).op = op;
-    (*this).arg1 = convertToString(arg1);
-}
-
-void quad::print()
-{
-    int nextInstr = 0;
-    if (op == "+" || op == "-" || op == "*" || op == "/" || op == "%")
-    {
-
-        (*this).printType1();
-    }
-    else if (op == "||" | op == "&&" | op == "==" | op == "!=" | op == "<=" | op == "<" | op == ">" | op == ">=")
-    {
-
-        (*this).printType2();
-    }
-    else if (op == "=")
-    {
-
-        cout << result << " = " << arg1;
-    }
-    else if (op == "uminus")
-    {
-
-        cout << result << " = -" << arg1;
-    }
-
-    else if (op == "!")
-    {
-
-        cout << result << " = !" << arg1;
-    }
-    else if (op == "return")
-    {
-
-        cout << "return " << result;
-    }
-    else if (op == "goto")
-    {
-        cout << "goto " << result;
-    }
-    else if (op == "label")
-    {
-        cout << "label " << result;
-    }
-    else if (op == "param")
-    {
-        cout << "param " << result;
-    }
-    else if (op == "call")
-    {
-        cout << "call " << result;
-    }
-    else
-    {
-        cout << "Can't find " << op;
-    }
-    cout << endl;
-}
-
-// add the new data type to the symbol typle ST
-void basicType::addType(string t, int s)
-{
-    type.push_back(t);
-    size.push_back(s);
-}
-
-// Quad Array print
-void quadArray::print()
-{   
-    cout << "TAC (Three Address Code) \n" << endl;
-    int k = 100;
-    vector<quad>::iterator it = Array.begin();
-
-    while (it != Array.end())
-    {
-        cout << k << ": ";
-        addSpaces(2);
-        it->print();
-        it++;
-        k++;
-    }
+	std::cout << setw(120) << setfill('-') << "-" << setfill(' ') << endl;
+	std::cout << endl;
+	for (list<symTable*>::iterator iterator = tablelist.begin(); iterator != tablelist.end();
+		++iterator)
+	{
+		(*iterator)->print();
+	}
 }
 /*=========================================================================================*/
 
-string convertToString(int num)
+void symTable::update()
 {
-    stringstream ss;
-    ss << num;
+	list<symTable*> tablelist;
+	int off=0;
+	for (list<sym>::iterator it = table.begin(); it != table.end(); it++)
+	{
+		it->offset = off;
+		off = it->offset + it->size;	
+		if (it->nested != NULL) tablelist.push_back(it->nested);
+	}
 
-    string temp = ss.str();
-    char *integer = (char *)temp.c_str();
-    string stringNew = string(integer);
-    return stringNew;
+	for (list<symTable*>::iterator iterator = tablelist.begin(); iterator != tablelist.end(); ++iterator)
+	{
+		(*iterator)->update();
+	}
 }
 /*=========================================================================================*/
 
-// emit
+sym *symTable::lookup(string name)
+{
+	sym * s;
+	for (list<sym>::iterator it = table.begin(); it != table.end(); it++)
+	{
+		if (it->name == name) return &*it;;
+	}
+
+	
+	s = new sym(name);
+	s->category = "local";
+	table.push_back(*s);
+	return &table.back();
+}
+/*=========================================================================================*/
+
 void emit(string op, string result, string arg1, string arg2)
 {
-    quad *q1 = new quad(result, arg1, op, arg2);
-    quadArr.Array.push_back(*q1);
+	q.Array.push_back(*(new quad(result, arg1, op, arg2)));
 }
 
 void emit(string op, string result, int arg1, string arg2)
 {
-    quad *q2 = new quad(result, arg1, op, arg2);
-    quadArr.Array.push_back(*q2);
+	q.Array.push_back(*(new quad(result, arg1, op, arg2)));
 }
 /*=========================================================================================*/
 
-// type conversion stuff
-sym *convertType(sym *s, string t)
-{
-    sym *tmp = gentemp(new symbolType(t));
 
-    if ((*s).type->type == "int")
-    {
+sym* convertType(sym *s, string t)
+{
+	sym *temp = gentemp(new symbolType(t));
+	if (s->type->type == "int")
+	{
         if (t == "char")
-        {
-            emit("=", tmp->name, "int2char(" + (*s).name + ")");
-            return tmp;
-        }
-        return s;
-    }
-    else if ((*s).type->type == "char")
-    {
-        if (t == "int")
-        {
-            emit("=", tmp->name, "char2int(" + (*s).name + ")", "");
-            return tmp;
-        }
-        return s;
-    }
-    return s;
+		{
+			emit("=", temp->name, "int2char(" + s->name + ")");
+			return temp;
+		}
+
+		return s;
+	}
+	else if (s->type->type == "char")
+	{
+		if (t == "int")
+		{
+			emit("=", temp->name, "char2int(" + s->name + ")");
+			return temp;
+		}
+
+		return s;
+	}
+
+	return s;
 }
 /*=========================================================================================*/
-bool compareSymbolType(sym *&s1, sym *&s2)
+
+bool compareSymbolType(sym* &s1, sym* &s2)
 {
-    symbolType *t1 = s1->type;
-    symbolType *t2 = s2->type;
-    if (compareSymbolType(t1, t2))
-        return true;
-    else if (s1 == convertType(s1, t2->type))
-        return true;
-    else if (s2 == convertType(s2, t1->type))
-        return true;
-    else
-        return false;
+	
+	symbolType *type1 = s1->type;
+	symbolType *type2 = s2->type;
+	if (compareSymbolType(type1, type2)) return true;
+	else if (s1 = convertType(s1, type2->type)) return true;
+	else if (s2 = convertType(s2, type1->type)) return true;
+	else return false;
 }
 
 bool compareSymbolType(symbolType *t1, symbolType *t2)
 {
-    if (t1 == NULL && t2 == NULL)
-        return true;
-    else if (t1 == NULL || t2 == NULL || t1->type != t2->type)
-        return false;
-    else
-        return compareSymbolType(t1->arrtype, t2->arrtype);
+	
+	if (t1 != NULL || t2 != NULL)
+	{
+		if (t1 == NULL) return false;
+		if (t2 == NULL) return false;
+		if (t1->type == t2->type) return compareSymbolType(t1->ptr, t2->ptr);
+		else return false;
+	}
+
+	return true;
 }
 /*=========================================================================================*/
 
-sym *gentemp(symbolType *t, string init)
+void backpatch(list<int> l, int addr)
 {
-    string name = "t" + convertToString(ST->tempCount++);
-    sym *s = new sym(name);
-    (*s).type = t;
-    (*s).size = sizeOfType(t);
-    (*s).val = init;
-    ST->table.push_back(*s);
-    return &ST->table.back();
-}
-
-void backpatch(list<int> l, int address)
-{
-    string str = convertToString(address);
-    list<int>::iterator it = l.begin();
-    while (it != l.end())
-    {
-        quadArr.Array[*it].result = str;
-        it++;
-    }
+	stringstream strs;
+	strs << addr;
+	string temp_str = strs.str();
+	char *intStr = (char*) temp_str.c_str();                                                    
+	string str = string(intStr);                                                                
+	for (list<int>::iterator it = l.begin(); it != l.end(); it++)                               
+	{                                                                                           
+		q.Array[*it].result = str;
+	}
 }
 
 list<int> makelist(int i)
 {
-    list<int> newL(1, i);
-    return newL;
+	list<int> l(1, i);                                                                           
+	return l;                                                                                    
 }
 
-list<int> merge(list<int> &l1, list<int> &l2)
+list<int> merge(list<int> &a, list<int> &b)
 {
-    l1.merge(l2);
-    return l1;
+	a.merge(b);                                                                                   
+	return a;                                                                                     
 }
 /*=========================================================================================*/
 
-Expression *convertInt2Bool(Expression *e)
+
+Expression* convertInt2Bool(Expression *e)                                                                     
 {
-    if (e->type != "bool")
-    {
-        e->falseList = makelist(nextInstr());
-        emit("==", "", e->loc->name, "0");
-        e->trueList = makelist(nextInstr());
-        emit("goto", " ");
-    }
-    return e;
+	
+	if (e->type != "BOOL")                                                                         
+	{
+		e->falseList = makelist(nextInstr());
+		emit("EQOP", "", e->loc->name, "0");
+		e->trueList = makelist(nextInstr());
+		emit("GOTOOP", "");
+	}
+
+	return e;
 }
 
-Expression *convertBool2Int(Expression *e)
+Expression* convertBool2Int(Expression *e)
 {
-    if (e->type == "bool")
-    {
-        e->loc = gentemp(new symbolType("int"));
-        backpatch(e->trueList, nextInstr());
-        emit("=", e->loc->name, "true");
-        int inst = nextInstr() + 1;
-        string str = convertToString(inst);
-        emit("goto", str);
-        backpatch(e->falseList, nextInstr());
-        emit("=", e->loc->name, "false");
-    }
-    return e;
-}
+	
+	if (e->type == "BOOL")
+	{
+		e->loc = gentemp(new symbolType("int"));
+		backpatch(e->trueList, nextInstr());
+		emit("=", e->loc->name, "true");
+		stringstream strs;
+		strs << nextInstr() + 1;
+		string temp_str = strs.str();
+		char *intStr = (char*) temp_str.c_str();
+		string str = string(intStr);
+		emit("GOTOOP", str);
+		backpatch(e->falseList, nextInstr());
+		emit("=", e->loc->name, "false");
+	}
 
+	return e;
+}
 /*=========================================================================================*/
-int main()
+
+
+sym* gentemp(symbolType *t, string init)
 {
-    bType.addType("null", 0);
-    bType.addType("void", 0);
-    bType.addType("char", size_of_char);
-    bType.addType("int", size_of_int);
-    bType.addType("ptr", size_of_pointer);
-    bType.addType("arr", 0);
-    bType.addType("func", 0);
-
-    instrCount = 0;
-
-    globalST = new symTable("Global");
-    ST = globalST;
-
-    yyparse();
-    globalST->update();
-
-    cout << "\n";
-    quadArr.print(); // print the TAC
-    cout << "\n";
-    globalST->print(); // print the symbol table
-    cout << "\n";
-
-    // pls work otherwise i will legit kms bruh!
+	char n[10];
+	sprintf(n, "t%02d", table->tempCount++);
+	sym *s = new sym(n);
+	s->type = t;
+	s->size = sizeOfType(t);
+	s->val = init;
+	s->category = "temp";
+	table->table.push_back(*s);
+	return &table->table.back();
 }
+/*=========================================================================================*/
 
-/*
-=====================================================================================================
-Reference - I read through multiple tinyC compiler stuff to understand how their thing is implemented.
-Hence, some of the code is inspired from there but I have written everything from scratch.
-I have also referred to the class slides and the dragon book for the same.
-
-Also, thanks to copilot for helping me finish my comments faster (hence citing copilot for comments as well).
-=====================================================================================================
-*/
+string printType(symbolType *t)
+{
+	if (t == NULL) return "null";
+	if (t->type == "void") return "void";
+	else if (t->type == "char") return "char";
+	else if (t->type == "int") return "integer";
+	else if (t->type == "ptr") return "ptr(" + printType(t->ptr) + ")";
+	else if (t->type == "arr")
+	{
+		stringstream strs;
+		strs << t->width;
+		string temp_str = strs.str();
+		char *intStr = (char*) temp_str.c_str();
+		string str = string(intStr);
+		return "arr(" + str + ", " + printType(t->ptr) + ")";
+	}
+	else if (t->type == "func") return "function";
+	else return "_";
+}

@@ -25,7 +25,7 @@ using namespace std;
         int instrNum;
         int paramCount;
 
-        symbolType* symType;
+        symbolType* symbolType;
         sym* symPtr;
         Array *A;
 
@@ -42,7 +42,7 @@ using namespace std;
 %token <char_value> CHARACTER_CONSTANT
 %token <char_value> STRING_LITERAL
 
-%token VOID CHAR INT IF ELSE FOR RETURN 
+%token void char INT IF ELSE FOR RETURN 
 %token L_SQUARE_BRACKET R_SQUARE_BRACKET L_ROUND_BRACKET R_ROUND_BRACKET L_CURLY_BRACKET R_CURLY_BRACKET 
 %token ARROW AMPERSAND ASTERISK PLUS MINUS DIVIDE MODULO NOT QUESTION 
 %token LESS_THAN GREATER_THAN LESS_THAN_EQUAL_TO GREATER_THAN_EQUAL_TO EQUAL_TO NOT_EQUAL_TO 
@@ -68,7 +68,7 @@ using namespace std;
 		expression_statement
 
 %type <S>
-        statement 
+        Statement 
 		compound_statement
         selection_statement 
         iteration_statement 
@@ -77,7 +77,7 @@ using namespace std;
         block_item_list 
         block_item_list_opt
 
-%type <symType> pointer
+%type <symbolType> pointer
 %type <symPtr> initializer
 %type <symPtr> direct_declarator init_declarator declarator
 
@@ -810,8 +810,8 @@ init_declarator: declarator {$$=$1;}
 				}
                 ;
 
-type_specifier: VOID    {var_type="void";}
-                | CHAR  { var_type="char"; }
+type_specifier: void    {var_type="void";}
+                | char  { var_type="char"; }
                 | INT   { var_type="int"; }
 
                 ;
@@ -920,19 +920,19 @@ direct_declarator: IDENTIFIER
 					}
 					| direct_declarator L_ROUND_BRACKET changetable parameter_list_opt R_ROUND_BRACKET  
 					{
-						ST->name = $1->name;
+						table->name = $1->name;
 						updateNextInstr();
 						if($1->type->type !="void") 
 						{
-							sym *s = ST->lookup("return");         
+							sym *s = table->lookup("return");         
 
 							s->update($1->type);
 							updateNextInstr();
 							
 						}
-						$1->nested=ST;       
+						$1->nested=table;       
 						updateNextInstr();	
-						ST->parent = globalST;
+						table->parent = globalST;
 						updateNextInstr();
 						changeTable(globalST);				
 
@@ -958,7 +958,7 @@ changetable: %empty
 					
 					changeTable(currentSymbol->nested);						
 					updateNextInstr();
-					emit("label", ST->name);
+					emit("label", table->name);
 					updateNextInstr();
 					
 				}
@@ -994,7 +994,7 @@ initializer: assignment_expression   { $$=$1->loc; }
 
 /* ===================================== 3. Statements =====================================*/
 
-statement: compound_statement 
+Statement: compound_statement 
                 {
                         $$ = $1;
                 }
@@ -1044,7 +1044,7 @@ block_item_list: block_item
                 ;
 
 block_item: declaration  { $$=new Statement(); }
-            | statement  
+            | Statement  
                 {
                         $$ = $1;
                 }
@@ -1054,7 +1054,7 @@ expression_statement: expression SEMICOLON  { $$=$1;}
 					| SEMICOLON { $$=new Expression(); }
                     ;
 
-selection_statement: IF L_ROUND_BRACKET expression N R_ROUND_BRACKET M statement N 
+selection_statement: IF L_ROUND_BRACKET expression N R_ROUND_BRACKET M Statement N 
 						{
 							backpatch($4->nextList, nextInstr());        
 
@@ -1074,7 +1074,7 @@ selection_statement: IF L_ROUND_BRACKET expression N R_ROUND_BRACKET M statement
 							$$->nextList = merge($8->nextList, temp);
 							updateNextInstr();
 						}
-                    | IF L_ROUND_BRACKET expression N R_ROUND_BRACKET M statement N ELSE M statement  
+                    | IF L_ROUND_BRACKET expression N R_ROUND_BRACKET M Statement N ELSE M Statement  
 						{
 							backpatch($4->nextList, nextInstr());		
 
@@ -1098,7 +1098,7 @@ selection_statement: IF L_ROUND_BRACKET expression N R_ROUND_BRACKET M statement
 						}
                     ;
 
-iteration_statement: FOR L_ROUND_BRACKET expression_statement M expression_statement M expression N R_ROUND_BRACKET M statement 
+iteration_statement: FOR L_ROUND_BRACKET expression_statement M expression_statement M expression N R_ROUND_BRACKET M Statement 
 					{
 						
 						$$ = new Statement();		 
@@ -1161,7 +1161,7 @@ function_definition: type_specifier declarator declaration_list_opt changetable 
 						
 						int nextInstr=0;	 
 						updateNextInstr();
-						ST->parent=globalST;
+						table->parent=globalST;
 						updateNextInstr();
 						changeTable(globalST);                    
 						updateNextInstr();
