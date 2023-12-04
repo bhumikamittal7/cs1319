@@ -36,20 +36,20 @@ WHITESPACE              [ \t\n]
 INVALID_TOKEN           .
 
 %%
-"char"                          {return char;}
+"char"                          {return CHAR;}
 "else"                          {return ELSE;}
 "for"                           {return FOR;}
 "if"                            {return IF;}
 "int"                           {return INT;}
 "return"                        {return RETURN;}
-"void"                          {return void;}
+"void"                          {return VOID;}
 
 
  /*edited here*/
 {STRING_LITERAL}                {   yylval.char_value = yytext;
                                     return STRING_LITERAL;}
 
-{IDENTIFIER}                    {   yylval.symPtr = table -> lookup(yytext);
+{IDENTIFIER}                    {   yylval.symPtr = ST -> lookup(yytext);
                                     return IDENTIFIER;}
 
 {INTEGER_CONSTANT}              {   yylval.intval = atoi(yytext);
