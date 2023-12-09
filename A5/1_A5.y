@@ -1122,10 +1122,11 @@ external_declaration: function_definition       {   }
                     | declaration         {   }
                     ;
 
-function_definition: type_specifier declarator declaration_list_opt changetable compound_statement  
+function_definition: type_specifier declarator declaration_list changetable compound_statement  {}
+					|type_specifier declarator changetable compound_statement
 					{
 						
-						emit("end", table->name);
+						emit("FUNCEND", table->name);
 						table->parent=globalST;
 						changeTable(globalST);                    
 						
@@ -1136,11 +1137,6 @@ function_definition: type_specifier declarator declaration_list_opt changetable 
 declaration_list: declaration   {  }
 				| declaration_list declaration	{  }
 				;				   										  				   
-
-declaration_list_opt: %empty {  }
-					| declaration_list   {  }
-					;
-
 %%
 
 void yyerror(const char * s) {        

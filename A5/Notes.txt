@@ -1,9 +1,14 @@
 Changes to be made:
-DONE
-    1. Flex is fine
-    2. Update Bison
-    3. Update header (almost done)
-    4. Update TAC file (try to keep same format though)
-=================================================================
-LEFT
-    5. Update Target code generator
+
+1. Make required bison changes so that test 3,4,5 also passes and don't give seg fault.
+
+
+things workig atm:
+1. int
+2. char
+3. arrays
+4. i/o lib?
+
+functions are not working - need to fix this 
+
+don't look into type conv stuff - not worth time

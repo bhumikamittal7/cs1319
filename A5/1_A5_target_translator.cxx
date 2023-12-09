@@ -1,3 +1,11 @@
+/*
+Some reference used for understanding - 
+https://www.felixcloutier.com/x86/
+https://www.cs.virginia.edu/~evans/cs216/guides/x86.html
+https://www.cs.fsu.edu/~baker/opsys/notes/assembly.html
+https://docs.oracle.com/cd/E19253-01/817-5477/eoiyg/index.html
+*/
+
 #include "1_A5_translator.h"
 #include <iostream>
 #include <cstring>
