@@ -1,42 +1,38 @@
 #include "1_A5_translator.h"
 #include <string>
-#include <sstream>  
-#include <iostream> 
+#include <sstream>
+#include <iostream>
 
 using namespace std;
 
 /*=========================================================================================*/
-quadArray q;                                                                            
-string var_type;                                                                            
-symTable * table;                                                                       
-sym * currentSymbol;                                                                    
-symTable * globalST;                                                                 
+quadArray q;
+string var_type;
+symTable *table;
+sym *currentSymbol;
+symTable *globalST;
 /*=========================================================================================*/
 
-symbolType::symbolType(string type, symbolType *ptr, int width):
-	type(type),
-	ptr(ptr),
-	width(width) {};
+symbolType::symbolType(string type, symbolType *ptr, int width) : type(type),
+																  ptr(ptr),
+																  width(width){};
 /*=========================================================================================*/
 
-quad::quad(string result, string arg1, string op, string arg2):
-	result(result), arg1(arg1), arg2(arg2), op(op) {};                                  
+quad::quad(string result, string arg1, string op, string arg2) : result(result), arg1(arg1), arg2(arg2), op(op){};
 
-
-quad::quad(string result, int arg1, string op, string arg2):
-	result(result), arg2(arg2), op(op)                                                  
-	{
-		stringstream strStr;                                                              
-		strStr << arg1;                                                                   
-		string tempStr = strStr.str();                                                   
-		char *intStr = (char*) tempStr.c_str();                                        
-		string str = string(intStr);                                                    
-		this->arg1 = str;                                                               
-	}
+quad::quad(string result, int arg1, string op, string arg2) : result(result), arg2(arg2), op(op)
+{
+	stringstream strStr;
+	strStr << arg1;
+	string tempStr = strStr.str();
+	char *intStr = (char *)tempStr.c_str();
+	string str = string(intStr);
+	this->arg1 = str;
+}
 /*=========================================================================================*/
 void changeTable(symTable *newtable)
 {
-	
+
 	table = newtable;
 }
 
@@ -45,59 +41,85 @@ int nextInstr()
 	return q.Array.size();
 }
 
-
 int sizeOfType(symbolType *t)
 {
-	if (t->type == "void") return 0;
-	else if (t->type == "arr") return t->width* sizeOfType(t->ptr);
-	else if (t->type == "ptr") return size_of_pointer;
-	else if (t->type == "char") return size_of_char;
-	else if (t->type == "func") return 0;
-	else if (t->type == "int") return size_of_int;
+	if (t->type == "void")
+		return 0;
+	else if (t->type == "arr")
+		return t->width * sizeOfType(t->ptr);
+	else if (t->type == "ptr")
+		return size_of_pointer;
+	else if (t->type == "char")
+		return size_of_char;
+	else if (t->type == "func")
+		return 0;
+	else if (t->type == "int")
+		return size_of_int;
 	return -1;
 }
 /*=========================================================================================*/
 
 void quad::print()
 {
-		
-	if (op == "ASSIGN") std::cout << result << " = " << arg1;
-	
-    
 
-	else if (op == "PLUS") std::cout << result << " = " << arg1 << " + " << arg2;
-	else if (op == "MINUS") std::cout << result << " = " << arg1 << " - " << arg2;
-	else if (op == "ASTERISK") std::cout << result << " = " << arg1 << " *" << arg2;
-	else if (op == "DIVIDE") std::cout << result << " = " << arg1 << " / " << arg2;
-	else if (op == "MODULO") std::cout << result << " = " << arg1 << " % " << arg2;
+	if (op == "ASSIGN")
+		std::cout << result << " = " << arg1;
 
-    
+	else if (op == "PLUS")
+		std::cout << result << " = " << arg1 << " + " << arg2;
+	else if (op == "MINUS")
+		std::cout << result << " = " << arg1 << " - " << arg2;
+	else if (op == "ASTERISK")
+		std::cout << result << " = " << arg1 << " *" << arg2;
+	else if (op == "DIVIDE")
+		std::cout << result << " = " << arg1 << " / " << arg2;
+	else if (op == "MODULO")
+		std::cout << result << " = " << arg1 << " % " << arg2;
 
-    else if (op == "EQUAL_TO") std::cout << "if " << arg1 << " == " << arg2 << " goto " << result;
-	else if (op == "NOT_EQUAL_TO") std::cout << "if " << arg1 << " != " << arg2 << " goto " << result;
-	else if (op == "LESS_THAN") std::cout << "if " << arg1 << "<" << arg2 << " goto " << result;
-	else if (op == "GREATER_THAN") std::cout << "if " << arg1 << " > " << arg2 << " goto " << result;
-	else if (op == "GREATER_THAN_EQUAL_TO") std::cout << "if " << arg1 << " >= " << arg2 << " goto " << result;
-	else if (op == "LESS_THAN_EQUAL_TO") std::cout << "if " << arg1 << " <= " << arg2 << " goto " << result;
-    else if (op == "LOGICAL_AND") std::cout << "if " << arg1 << " && " << arg2 << " goto " << result;
-    else if (op == "LOGICAL_OR") std::cout << "if " << arg1 << " || " << arg2 << " goto " << result;
+	else if (op == "EQUAL_TO")
+		std::cout << "if " << arg1 << " == " << arg2 << " goto " << result;
+	else if (op == "NOT_EQUAL_TO")
+		std::cout << "if " << arg1 << " != " << arg2 << " goto " << result;
+	else if (op == "LESS_THAN")
+		std::cout << "if " << arg1 << "<" << arg2 << " goto " << result;
+	else if (op == "GREATER_THAN")
+		std::cout << "if " << arg1 << " > " << arg2 << " goto " << result;
+	else if (op == "GREATER_THAN_EQUAL_TO")
+		std::cout << "if " << arg1 << " >= " << arg2 << " goto " << result;
+	else if (op == "LESS_THAN_EQUAL_TO")
+		std::cout << "if " << arg1 << " <= " << arg2 << " goto " << result;
+	else if (op == "LOGICAL_AND")
+		std::cout << "if " << arg1 << " && " << arg2 << " goto " << result;
+	else if (op == "LOGICAL_OR")
+		std::cout << "if " << arg1 << " || " << arg2 << " goto " << result;
 
-	else if (op == "GOTO") std::cout << "goto " << result;
+	else if (op == "GOTO")
+		std::cout << "goto " << result;
 
-    
+	else if (op == "UMINUS")
+		std::cout << result << " = -" << arg1;
+	else if (op == "!")
+		std::cout << result << " = !" << arg1;
 
-	else if (op == "UMINUS") std::cout << result << " = -" << arg1;
-    else if (op == "!") std::cout << result << " = !" << arg1;
+	else if (op == "[]")
+		std::cout << result << " = " << arg1 << "[" << arg2 << "]";
+	else if (op == "[]=")
+		std::cout << result << "[" << arg1 << "]"
+				  << " = " << arg2;
+	else if (op == "RETURN")
+		std::cout << "return " << result;
+	else if (op == "param")
+		std::cout << "param " << result;
+	else if (op == "call")
+		std::cout << result << " = "
+				  << "call " << arg1 << ", " << arg2;
+	else if (op == "FUNC")
+		std::cout << result << ": ";
+	else if (op == "FUNCEND")
+		std::cout << "";
 
-	else if (op == "[]") std::cout << result << " = " << arg1 << "[" << arg2 << "]";
-	else if (op == "[]=") std::cout << result << "[" << arg1 << "]" << " = " << arg2;
-	else if (op == "RETURN") std::cout << "return " << result;
-	else if (op == "param") std::cout << "param " << result;
-	else if (op == "call") std::cout << result << " = " << "call " << arg1 << ", " << arg2;
-	else if (op == "FUNC") std::cout << result << ": ";
-	else if (op == "FUNCEND") std::cout << "";
-    
-	else std::cout << "op";
+	else
+		std::cout << "op";
 	std::cout << endl;
 }
 /*=========================================================================================*/
@@ -115,7 +137,9 @@ void quadArray::print()
 			it->print();
 			std::cout << "\n";
 		}
-		else if (it->op == "FUNCEND") {}
+		else if (it->op == "FUNCEND")
+		{
+		}
 		else
 		{
 			std::cout << "\t" << setw(4) << it - Array.begin() << ":\t";
@@ -126,7 +150,7 @@ void quadArray::print()
 	std::cout << setw(30) << setfill('-') << "-" << endl;
 }
 /*=========================================================================================*/
-sym::sym(string name, string t, symbolType *ptr, int width): name(name)
+sym::sym(string name, string t, symbolType *ptr, int width) : name(name)
 {
 	type = new symbolType(t, ptr, width);
 	nested = NULL;
@@ -143,17 +167,18 @@ sym *sym::update(symbolType *t)
 	return this;
 }
 
-symTable::symTable(string name): name(name), tempCount(0) {}
+symTable::symTable(string name) : name(name), tempCount(0) {}
 
 void symTable::print()
 {
-	list<symTable*> tablelist;
+	list<symTable *> tablelist;
 	std::cout << setw(120) << setfill('=') << "=" << endl;
 	std::cout << "Symbol Table: " << setfill(' ') << left << setw(50) << this->name;
 	std::cout << right << setw(25) << "Parent: ";
 	if (this->parent != NULL)
 		std::cout << this->parent->name;
-	else std::cout << "null";
+	else
+		std::cout << "null";
 	std::cout << endl;
 	std::cout << setw(120) << setfill('-') << "-" << endl;
 	std::cout << setfill(' ') << left << setw(15) << "Name";
@@ -188,8 +213,8 @@ void symTable::print()
 
 	std::cout << setw(120) << setfill('-') << "-" << setfill(' ') << endl;
 	std::cout << endl;
-	for (list<symTable*>::iterator iterator = tablelist.begin(); iterator != tablelist.end();
-		++iterator)
+	for (list<symTable *>::iterator iterator = tablelist.begin(); iterator != tablelist.end();
+		 ++iterator)
 	{
 		(*iterator)->print();
 	}
@@ -198,16 +223,17 @@ void symTable::print()
 
 void symTable::update()
 {
-	list<symTable*> tablelist;
-	int offsetVal=0;
+	list<symTable *> tablelist;
+	int offsetVal = 0;
 	for (list<sym>::iterator it = table.begin(); it != table.end(); it++)
 	{
 		it->offset = offsetVal;
-		offsetVal = it->offset + it->size;	
-		if (it->nested != NULL) tablelist.push_back(it->nested);
+		offsetVal = it->offset + it->size;
+		if (it->nested != NULL)
+			tablelist.push_back(it->nested);
 	}
 
-	for (list<symTable*>::iterator iterator = tablelist.begin(); iterator != tablelist.end(); ++iterator)
+	for (list<symTable *>::iterator iterator = tablelist.begin(); iterator != tablelist.end(); ++iterator)
 	{
 		(*iterator)->update();
 	}
@@ -216,15 +242,16 @@ void symTable::update()
 
 sym *symTable::lookup(string name)
 {
-	sym * s;
+	sym *s;
 	for (list<sym>::iterator it = table.begin(); it != table.end(); it++)
 	{
-		if (it->name == name) return &*it;;
+		if (it->name == name)
+			return &*it;
+		;
 	}
 
-	
 	s = new sym(name);
-	s->category = "local";		// setting this as kinda a default cat because this makes most sense ughh!
+	s->category = "local"; // setting this as kinda a default cat because this makes most sense ughh!
 	table.push_back(*s);
 	return &table.back();
 }
@@ -241,13 +268,12 @@ void emit(string op, string result, int arg1, string arg2)
 }
 /*=========================================================================================*/
 
-
-sym* convertType(sym *s, string t)
+sym *convertType(sym *s, string t)
 {
 	sym *temp = gentemp(new symbolType(t));
 	if (s->type->type == "int")
 	{
-        if (t == "char")
+		if (t == "char")
 		{
 			emit("ASSIGN", temp->name, "intTochar(" + s->name + ")");
 			return temp;
@@ -270,26 +296,34 @@ sym* convertType(sym *s, string t)
 }
 /*=========================================================================================*/
 
-bool compareSymbolType(sym* &s1, sym* &s2)
+bool compareSymbolType(sym *&s1, sym *&s2)
 {
-	
+
 	symbolType *type1 = s1->type;
 	symbolType *type2 = s2->type;
-	if (compareSymbolType(type1, type2)) return true;
-	else if (s1 = convertType(s1, type2->type)) return true;
-	else if (s2 = convertType(s2, type1->type)) return true;
-	else return false;
+	if (compareSymbolType(type1, type2))
+		return true;
+	else if (s1 = convertType(s1, type2->type))
+		return true;
+	else if (s2 = convertType(s2, type1->type))
+		return true;
+	else
+		return false;
 }
 
 bool compareSymbolType(symbolType *t1, symbolType *t2)
 {
-	
+
 	if (t1 != NULL || t2 != NULL)
 	{
-		if (t1 == NULL) return false;
-		if (t2 == NULL) return false;
-		if (t1->type == t2->type) return compareSymbolType(t1->ptr, t2->ptr);
-		else return false;
+		if (t1 == NULL)
+			return false;
+		if (t2 == NULL)
+			return false;
+		if (t1->type == t2->type)
+			return compareSymbolType(t1->ptr, t2->ptr);
+		else
+			return false;
 	}
 
 	return true;
@@ -301,32 +335,31 @@ void backpatch(list<int> l, int addr)
 	stringstream strStr;
 	strStr << addr;
 	string tempStr = strStr.str();
-	char *intStr = (char*) tempStr.c_str();                                                    
-	string str = string(intStr);                                                                
-	for (list<int>::iterator it = l.begin(); it != l.end(); it++)                               
-	{                                                                                           
+	char *intStr = (char *)tempStr.c_str();
+	string str = string(intStr);
+	for (list<int>::iterator it = l.begin(); it != l.end(); it++)
+	{
 		q.Array[*it].result = str;
 	}
 }
 
 list<int> makelist(int i)
 {
-	list<int> l(1, i);                                                                           
-	return l;                                                                                    
+	list<int> l(1, i);
+	return l;
 }
 
 list<int> merge(list<int> &l1, list<int> &l2)
 {
-	l1.merge(l2);                                                                                   
-	return l1;                                                                                     
+	l1.merge(l2);
+	return l1;
 }
 /*=========================================================================================*/
 
-
-Expression* convertInt2Bool(Expression *e)                                                                     
+Expression *convertInt2Bool(Expression *e)
 {
-	
-	if (e->type != "BOOL")                                                                         
+
+	if (e->type != "BOOL")
 	{
 		e->falseList = makelist(nextInstr());
 		emit("ASSIGN", "", e->loc->name, "0");
@@ -337,9 +370,9 @@ Expression* convertInt2Bool(Expression *e)
 	return e;
 }
 
-Expression* convertBool2Int(Expression *e)
+Expression *convertBool2Int(Expression *e)
 {
-	
+
 	if (e->type == "BOOL")
 	{
 		e->loc = gentemp(new symbolType("int"));
@@ -348,7 +381,7 @@ Expression* convertBool2Int(Expression *e)
 		stringstream strStr;
 		strStr << nextInstr() + 1;
 		string tempStr = strStr.str();
-		char *intStr = (char*) tempStr.c_str();
+		char *intStr = (char *)tempStr.c_str();
 		string str = string(intStr);
 		emit("GOTO", str);
 		backpatch(e->falseList, nextInstr());
@@ -359,10 +392,9 @@ Expression* convertBool2Int(Expression *e)
 }
 /*=========================================================================================*/
 
-
-sym* gentemp(symbolType *t, string init)
+sym *gentemp(symbolType *t, string init)
 {
-	char n[5];		
+	char n[5];
 	sprintf(n, "t%02d", table->tempCount++);
 	sym *s = new sym(n);
 	s->type = t;
@@ -376,20 +408,27 @@ sym* gentemp(symbolType *t, string init)
 
 string printType(symbolType *t)
 {
-	if (t == NULL) return "null";
-	if (t->type == "void") return "void";
-	else if (t->type == "char") return "char";
-	else if (t->type == "int") return "integer";
-	else if (t->type == "ptr") return "pointer(" + printType(t->ptr) + ")";
+	if (t == NULL)
+		return "null";
+	if (t->type == "void")
+		return "void";
+	else if (t->type == "char")
+		return "char";
+	else if (t->type == "int")
+		return "integer";
+	else if (t->type == "ptr")
+		return "pointer(" + printType(t->ptr) + ")";
 	else if (t->type == "arr")
 	{
 		stringstream strStr;
 		strStr << t->width;
 		string tempStr = strStr.str();
-		char *intStr = (char*) tempStr.c_str();
+		char *intStr = (char *)tempStr.c_str();
 		string str = string(intStr);
 		return "array(" + str + ", " + printType(t->ptr) + ")";
 	}
-	else if (t->type == "FUNC") return "function";
-	else return "_";
+	else if (t->type == "FUNC")
+		return "function";
+	else
+		return "_";
 }
