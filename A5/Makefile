@@ -1,22 +1,29 @@
 TARGET = translator
-TEST_FILE = 1_A5.nc
-OUTPUT_FILE = 1_A5.out
+TEST_FILE = A5_Tests/test1.nc
+OUTPUT_FILE = A5_Tests/test1.out
+
+asmgenerator: $(TARGET)
+	./$(TARGET) < $(TEST_FILE) > $(OUTPUT_FILE).asm
+
 
 all: $(TARGET)
 	./$(TARGET) < $(TEST_FILE) > $(OUTPUT_FILE)
 
-$(TARGET): lex.yy.o 1_A5.tab.o 1_A5_translator.o
-	g++ lex.yy.o 1_A5.tab.o 1_A5_translator.o -ll -o $(TARGET) -w
+$(TARGET): lex.yy.o 1_A5.tab.o 1_A5_translator.o 1_A5_target_translator.o
+	g++ lex.yy.o 1_A5.tab.o 1_A5_translator.o 1_A5_target_translator.o -ll -o $(TARGET) -Werror
+
+1_A5_target_translator.o: 1_A5_target_translator.cxx 
+	g++ -c 1_A5_target_translator.cxx
 
 1_A5_translator.o: 1_A5_translator.cxx 1_A5_translator.h
-	g++ -c 1_A5_translator.h -w
-	g++ -c 1_A5_translator.cxx -w
+	g++ -c 1_A5_translator.h
+	g++ -c 1_A5_translator.cxx
 
 lex.yy.o: lex.yy.c
-	g++ -c lex.yy.c -w -fcompare-debug-second 
+	g++ -c lex.yy.c 
 
 1_A5.tab.o: 1_A5.tab.c
-	g++ -c 1_A5.tab.c -w -fcompare-debug-second 	
+	g++ -c 1_A5.tab.c
 
 lex.yy.c: 1_A5.l 1_A5.tab.h 1_A5_translator.h
 	flex 1_A5.l
@@ -25,7 +32,7 @@ lex.yy.c: 1_A5.l 1_A5.tab.h 1_A5_translator.h
 	bison -d 1_A5.y
 
 clean:
-	rm lex.yy.c 1_A5.tab.c 1_A5.tab.h lex.yy.o 1_A5.tab.o 1_A5_translator.o $(TARGET) 1_A5_translator.h.gch
+	rm lex.yy.c 1_A5.tab.c 1_A5.tab.h lex.yy.o 1_A5.tab.o 1_A5_translator.o $(TARGET) 1_A5_translator.h.gch 1_A5_target_translator.o $(OUTPUT_FILE) $(OUTPUT_FILE).asm
 
 build: $(TARGET)
 
