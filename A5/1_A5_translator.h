@@ -41,7 +41,6 @@ public:
 
 	sym(string name, string t = "int", symbolType *ptr = NULL, int width = 0);
 	sym *update(symbolType *t);
-	// sym* link_to_symbolTable(symTable *t);
 };
 /*=========================================================================================*/
 class symTable
@@ -68,8 +67,8 @@ public:
 	string arg1;
 	string arg2;
 
-	quad(string result, string arg1, string op = "=", string arg2 = "");
-	quad(string result, int arg1, string op = "=", string arg2 = "");
+	quad(string result, string arg1, string op = "ASSIGN", string arg2 = "");
+	quad(string result, int arg1, string op = "ASSIGN", string arg2 = "");
 	void print();
 };
 /*=========================================================================================*/

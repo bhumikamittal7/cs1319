@@ -7,7 +7,7 @@ using namespace std;
 
 /*=========================================================================================*/
 quadArray q;                                                                            
-string Type;                                                                            
+string var_type;                                                                            
 symTable * table;                                                                       
 sym * currentSymbol;                                                                    
 symTable * globalST;                                                                 
@@ -26,10 +26,10 @@ quad::quad(string result, string arg1, string op, string arg2):
 quad::quad(string result, int arg1, string op, string arg2):
 	result(result), arg2(arg2), op(op)                                                  
 	{
-		stringstream strs;                                                              
-		strs << arg1;                                                                   
-		string temp_str = strs.str();                                                   
-		char *intStr = (char*) temp_str.c_str();                                        
+		stringstream strStr;                                                              
+		strStr << arg1;                                                                   
+		string tempStr = strStr.str();                                                   
+		char *intStr = (char*) tempStr.c_str();                                        
 		string str = string(intStr);                                                    
 		this->arg1 = str;                                                               
 	}
@@ -61,7 +61,7 @@ int sizeOfType(symbolType *t)
 void quad::print()
 {
 		
-	if (op == "=") std::cout << result << " = " << arg1;
+	if (op == "ASSIGN") std::cout << result << " = " << arg1;
 	
     
 
@@ -89,11 +89,11 @@ void quad::print()
 	else if (op == "UMINUS") std::cout << result << " = -" << arg1;
     else if (op == "!") std::cout << result << " = !" << arg1;
 
-	else if (op == "ARRR") std::cout << result << " = " << arg1 << "[" << arg2 << "]";
-	else if (op == "ARRL") std::cout << result << "[" << arg1 << "]" << " = " << arg2;
-	else if (op == "RETURN") std::cout << "ret " << result;
-	else if (op == "PARAM") std::cout << "param " << result;
-	else if (op == "CALL") std::cout << result << " = " << "call " << arg1 << ", " << arg2;
+	else if (op == "[]") std::cout << result << " = " << arg1 << "[" << arg2 << "]";
+	else if (op == "[]=") std::cout << result << "[" << arg1 << "]" << " = " << arg2;
+	else if (op == "RETURN") std::cout << "return " << result;
+	else if (op == "param") std::cout << "param " << result;
+	else if (op == "call") std::cout << result << " = " << "call " << arg1 << ", " << arg2;
 	else if (op == "FUNC") std::cout << result << ": ";
 	else if (op == "FUNCEND") std::cout << "";
     
@@ -105,11 +105,11 @@ void quad::print()
 void quadArray::print()
 {
 	std::cout << setw(30) << setfill('=') << "=" << endl;
-	std::cout << "Quad Translation" << endl;
+	std::cout << "TAC" << endl;
 	std::cout << setw(30) << setfill('-') << "-" << setfill(' ') << endl;
 	for (vector<quad>::iterator it = Array.begin(); it != Array.end(); it++)
 	{
-		if (it->op == "func")
+		if (it->op == "FUNC")
 		{
 			std::cout << "\n";
 			it->print();
@@ -199,11 +199,11 @@ void symTable::print()
 void symTable::update()
 {
 	list<symTable*> tablelist;
-	int off=0;
+	int offsetVal=0;
 	for (list<sym>::iterator it = table.begin(); it != table.end(); it++)
 	{
-		it->offset = off;
-		off = it->offset + it->size;	
+		it->offset = offsetVal;
+		offsetVal = it->offset + it->size;	
 		if (it->nested != NULL) tablelist.push_back(it->nested);
 	}
 
@@ -224,7 +224,7 @@ sym *symTable::lookup(string name)
 
 	
 	s = new sym(name);
-	s->category = "local";
+	s->category = "local";		// setting this as kinda a default cat because this makes most sense ughh!
 	table.push_back(*s);
 	return &table.back();
 }
@@ -249,7 +249,7 @@ sym* convertType(sym *s, string t)
 	{
         if (t == "char")
 		{
-			emit("=", temp->name, "int2char(" + s->name + ")");
+			emit("ASSIGN", temp->name, "intTochar(" + s->name + ")");
 			return temp;
 		}
 
@@ -259,7 +259,7 @@ sym* convertType(sym *s, string t)
 	{
 		if (t == "int")
 		{
-			emit("=", temp->name, "char2int(" + s->name + ")");
+			emit("ASSIGN", temp->name, "charToint(" + s->name + ")");
 			return temp;
 		}
 
@@ -298,10 +298,10 @@ bool compareSymbolType(symbolType *t1, symbolType *t2)
 
 void backpatch(list<int> l, int addr)
 {
-	stringstream strs;
-	strs << addr;
-	string temp_str = strs.str();
-	char *intStr = (char*) temp_str.c_str();                                                    
+	stringstream strStr;
+	strStr << addr;
+	string tempStr = strStr.str();
+	char *intStr = (char*) tempStr.c_str();                                                    
 	string str = string(intStr);                                                                
 	for (list<int>::iterator it = l.begin(); it != l.end(); it++)                               
 	{                                                                                           
@@ -315,10 +315,10 @@ list<int> makelist(int i)
 	return l;                                                                                    
 }
 
-list<int> merge(list<int> &a, list<int> &b)
+list<int> merge(list<int> &l1, list<int> &l2)
 {
-	a.merge(b);                                                                                   
-	return a;                                                                                     
+	l1.merge(l2);                                                                                   
+	return l1;                                                                                     
 }
 /*=========================================================================================*/
 
@@ -329,9 +329,9 @@ Expression* convertInt2Bool(Expression *e)
 	if (e->type != "BOOL")                                                                         
 	{
 		e->falseList = makelist(nextInstr());
-		emit("EQOP", "", e->loc->name, "0");
+		emit("ASSIGN", "", e->loc->name, "0");
 		e->trueList = makelist(nextInstr());
-		emit("GOTOOP", "");
+		emit("GOTO", "");
 	}
 
 	return e;
@@ -344,15 +344,15 @@ Expression* convertBool2Int(Expression *e)
 	{
 		e->loc = gentemp(new symbolType("int"));
 		backpatch(e->trueList, nextInstr());
-		emit("=", e->loc->name, "true");
-		stringstream strs;
-		strs << nextInstr() + 1;
-		string temp_str = strs.str();
-		char *intStr = (char*) temp_str.c_str();
+		emit("ASSIGN", e->loc->name, "true");
+		stringstream strStr;
+		strStr << nextInstr() + 1;
+		string tempStr = strStr.str();
+		char *intStr = (char*) tempStr.c_str();
 		string str = string(intStr);
-		emit("GOTOOP", str);
+		emit("GOTO", str);
 		backpatch(e->falseList, nextInstr());
-		emit("=", e->loc->name, "false");
+		emit("ASSIGN", e->loc->name, "false");
 	}
 
 	return e;
@@ -362,7 +362,7 @@ Expression* convertBool2Int(Expression *e)
 
 sym* gentemp(symbolType *t, string init)
 {
-	char n[10];
+	char n[5];		
 	sprintf(n, "t%02d", table->tempCount++);
 	sym *s = new sym(n);
 	s->type = t;
@@ -380,16 +380,16 @@ string printType(symbolType *t)
 	if (t->type == "void") return "void";
 	else if (t->type == "char") return "char";
 	else if (t->type == "int") return "integer";
-	else if (t->type == "ptr") return "ptr(" + printType(t->ptr) + ")";
+	else if (t->type == "ptr") return "pointer(" + printType(t->ptr) + ")";
 	else if (t->type == "arr")
 	{
-		stringstream strs;
-		strs << t->width;
-		string temp_str = strs.str();
-		char *intStr = (char*) temp_str.c_str();
+		stringstream strStr;
+		strStr << t->width;
+		string tempStr = strStr.str();
+		char *intStr = (char*) tempStr.c_str();
 		string str = string(intStr);
-		return "arr(" + str + ", " + printType(t->ptr) + ")";
+		return "array(" + str + ", " + printType(t->ptr) + ")";
 	}
-	else if (t->type == "func") return "function";
+	else if (t->type == "FUNC") return "function";
 	else return "_";
 }

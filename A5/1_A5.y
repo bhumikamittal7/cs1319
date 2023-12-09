@@ -10,11 +10,10 @@
 extern string var_type;
 extern int yylex();
 void yyerror(const char *s);
+vector <string> storeString;
 
 using namespace std;
 %}
-
-
 
 %define parse.error verbose
 /* ==================================== UNION =============================================== */
@@ -23,7 +22,6 @@ using namespace std;
         char* char_value;
         int intval;
         int instrNum;
-        int paramCount;
 
         symbolType* symType;
         sym* symPtr;
@@ -42,7 +40,7 @@ using namespace std;
 %token <char_value> CHARACTER_CONSTANT
 %token <char_value> STRING_LITERAL
 
-%token VOID CHAR INT IF ELSE FOR RETURN 
+%token VOID CHAR INT IF ELSE FOR RETURN GOTO
 %token L_SQUARE_BRACKET R_SQUARE_BRACKET L_ROUND_BRACKET R_ROUND_BRACKET L_CURLY_BRACKET R_CURLY_BRACKET 
 %token ARROW AMPERSAND ASTERISK PLUS MINUS DIVIDE MODULO NOT QUESTION 
 %token LESS_THAN GREATER_THAN LESS_THAN_EQUAL_TO GREATER_THAN_EQUAL_TO EQUAL_TO NOT_EQUAL_TO 
@@ -52,7 +50,7 @@ using namespace std;
 
 /* ==================================== Type stuff  =============================================== */
 %type <unaryOp> unary_operator
-%type <paramCount> argument_expression_list argument_expression_list_opt
+%type <intval> argument_expression_list
 %type <E> 
         expression 
 		primary_expression
@@ -68,6 +66,7 @@ using namespace std;
 
 %type <S>
         Statement 
+		labeled_statement		//adding this for the labels - A4 didn't have this but this seems to me needed - source? saw something like somewhere but i don't remember where
 		compound_statement
         selection_statement 
         iteration_statement 
@@ -77,7 +76,7 @@ using namespace std;
         block_item_list_opt
 
 %type <symType> pointer
-%type <symPtr> initializer
+%type <symPtr> initializer constant
 %type <symPtr> direct_declarator init_declarator declarator
 
 %type<A> postfix_expression
@@ -88,22 +87,39 @@ using namespace std;
 %type <S> N
 
 %%
-
 M: %empty 
 	{ 
 		$$ = nextInstr(); 
 	}
     ;
 
-N: %empty { 
+N: %empty 
+	{ 
         $$ = new Statement();
         $$ -> nextList = makelist(nextInstr());
-        emit("goto", "");
-         
-};
+        emit("GOTO", "");   
+	};
 
 /* ===================================== 1. Expressions =====================================*/
-
+constant: INTEGER_CONSTANT 
+		{
+			stringstream strStr;
+			strStr << $1;
+			string tempStr = strStr.str();
+			char* intStr = (char*)tempStr.c_str();
+			string str = string(intStr);
+			$$ = gentemp(new symbolType("int"), str);
+			emit("ASSIGN", $$->name, $1);
+			
+		}
+		| CHARACTER_CONSTANT 
+		{
+			
+			$$ = gentemp(new symbolType("char"), $1);
+			emit("ASSIGNCHAR", $$->name, $1);
+			
+		}
+		;
 primary_expression : IDENTIFIER 
                         {
 							$$ = new Expression();
@@ -113,33 +129,25 @@ primary_expression : IDENTIFIER
 							$$->type = "not-boolean";
 							
                         }
-                    | INTEGER_CONSTANT 
-						{
-							$$=new Expression();	
-							
-							string p=convertToString($1);
-							
-							$$->loc=gentemp(new symbolType("int"),p);
-							
-							emit("=",$$->loc->name,p);
-							
-						}
-					| CHARACTER_CONSTANT
-						{
-							$$=new Expression();
-							
-							$$->loc=gentemp(new symbolType("char"),$1);
-							
-							emit("=",$$->loc->name,string($1));
-							
-						}
+                    | constant 
+					{
+						$$ = new Expression();
+						$$-> loc = $1;
+					}
                     | STRING_LITERAL    
                     {
                         $$=new Expression();
                         
                         $$->loc=gentemp(new symbolType("ptr"),$1);
                         
-                        $$->loc->type->type=new symbolType("char");
+                        $$->loc->type->ptr=new symbolType("char");
+						storeString.push_back($1);
+						stringstream strStr;
+						strStr << storeString.size()-1;
+						string tempStr = strStr.str();
+						char* intStr = (char*)tempStr.c_str();
+						string str = string(intStr);
+						emit("ASSIGNSTR", $$->loc->name, str);
                         
                         
                     }
@@ -162,67 +170,50 @@ postfix_expression: primary_expression
                         }
 
                     | postfix_expression L_SQUARE_BRACKET expression R_SQUARE_BRACKET
-                { 	
+                	{ 	
                                 	 
-						$$=new Array();
-						
-						$$->type=$1->type->type;				
+						$$=new Array();						
+						$$->Array = $1->loc;
+						$$->type = $1->type->ptr;
+						$$->loc = gentemp(new symbolType("int"));
 
-									
-						$$->Array=$1->Array;						
-
-						
-						$$->loc=gentemp(new symbolType("int"));		
-
-						
-						$$->aType="arr";						
-
-						
-						if($1->aType=="arr") 
-						{			
-							
-							sym* t=gentemp(new symbolType("int"));
-							
-							int p=sizeOfType($$->type);
-							
-							string str=convertToString(p);
-							
-							emit("*",t->name,$3->loc->name,str);
-								
-							
-							emit("+",$$->loc->name,$1->loc->name,t->name);
-							
-							
+						if ($1->aType == "arr")
+						{
+							sym*t = gentemp(new symbolType("int"));
+							stringstream strStr;
+							strStr << sizeOfType($$->type);
+							string tempStr = strStr.str();
+							char* intStr = (char*)tempStr.c_str();
+							string str = string(intStr);
+							emit("ASTERISK", t->name, $3->loc->name, str);
+							emit("PLUS", $$->loc->name, $1->loc->name, t->name);
 						}
-						else 
-						{                        
-
-							int p=sizeOfType($$->type);
-							
-							string str=convertToString(p);
-							
-							emit("*",$$->loc->name,$3->loc->name,str);
-							
-							
+						else
+						{
+							stringstream strStr;
+							strStr << sizeOfType($$->type);
+							string tempStr = strStr.str();
+							char* intStr1 = (char*)tempStr.c_str();
+							string str1 = string(intStr1);
+							emit("*", $$->loc->name, $3->loc->name, str1);
 						}
+					$$->aType = "arr";
 	        }
-                    | postfix_expression L_ROUND_BRACKET argument_expression_list_opt R_ROUND_BRACKET
+                    | postfix_expression L_ROUND_BRACKET argument_expression_list R_ROUND_BRACKET
                     {
                         $$=new Array();	
                         
                         $$->Array=gentemp($1->type);
-                        
-                        string str=convertToString($3);
-                        
-                        emit("call",$$->Array->name,$1->Array->name,str);
+						stringstream strStr;
+						strStr << $3;
+						string tempStr = strStr.str();
+						char* intStr = (char*)tempStr.c_str();
+						string str = string(intStr);
+						emit("call", $$->Array->name, $1->Array->name, str);
                         
                     }
                     | postfix_expression ARROW IDENTIFIER {  }/* pointer indirection only one level */
                     ;
-
-argument_expression_list_opt: argument_expression_list  { $$=$1; }  
-                            | %empty{ $$=0; } 
-                            ;
 
 argument_expression_list: assignment_expression
                         {
@@ -254,7 +245,7 @@ unary_expression: postfix_expression { $$=$1; }
                                         case '-':				
                                                 $$->Array=gentemp(new symbolType($2->Array->type->type));
                                                 
-                                                emit("uminus",$$->Array->name,$2->Array->name);
+                                                emit("UMINUS",$$->Array->name,$2->Array->name);
                                                 
                                                 break; 
 
@@ -265,28 +256,7 @@ unary_expression: postfix_expression { $$=$1; }
                                                 
                                                 break;
 
-										case '&':                                       
-
-												
-												$$->Array=gentemp((new symbolType("ptr")));
-												
-												$$->Array->type->type=$2->Array->type; 
-												
-												emit("=&",$$->Array->name,$2->Array->name);
-												
-												break;
-												
-										case '*':                          
-
-											$$->aType="ptr";
-											
-											$$->loc=gentemp($2->Array->type->type);
-											
-											$$->Array=$2->Array;
-											
-											emit("=*",$$->loc->name,$2->Array->name);
-											
-											
+										default:
 											break;
 						
                                 }
@@ -361,7 +331,7 @@ multiplicative_expression: unary_expression
 										
 										$$->loc = gentemp(new symbolType($1->loc->type->type));
 										
-										emit("*", $$->loc->name, $1->loc->name, $3->Array->name);
+										emit("ASTERISK", $$->loc->name, $1->loc->name, $3->Array->name);
 										
 										
 									}
@@ -377,7 +347,7 @@ multiplicative_expression: unary_expression
 										
 										$$->loc = gentemp(new symbolType($1->loc->type->type));
 										
-										emit("/", $$->loc->name, $1->loc->name, $3->Array->name);
+										emit("DIVIDE", $$->loc->name, $1->loc->name, $3->Array->name);
 											
 																
 									}
@@ -393,7 +363,7 @@ multiplicative_expression: unary_expression
 										
 										$$->loc = gentemp(new symbolType($1->loc->type->type));
 										
-										emit("%", $$->loc->name, $1->loc->name, $3->Array->name);	
+										emit("MODULO", $$->loc->name, $1->loc->name, $3->Array->name);	
 											
 											
 									}
@@ -415,7 +385,7 @@ additive_expression: multiplicative_expression  /* these are left associative */
 								
 								$$->loc = gentemp(new symbolType($1->loc->type->type));
 								
-								emit("+", $$->loc->name, $1->loc->name, $3->loc->name);
+								emit("PLUS", $$->loc->name, $1->loc->name, $3->loc->name);
 								
 								
 							}
@@ -431,7 +401,7 @@ additive_expression: multiplicative_expression  /* these are left associative */
 								
 								$$->loc = gentemp(new symbolType($1->loc->type->type));
 								
-								emit("-", $$->loc->name, $1->loc->name, $3->loc->name);
+								emit("MINUS", $$->loc->name, $1->loc->name, $3->loc->name);
 								
 								
 							}
@@ -447,7 +417,7 @@ relational_expression: additive_expression      /* these are left associative */
 								if(!compareSymbolType($1->loc, $3->loc)) 
 								{
 									
-									cout << "Type Error in Program"<< endl;
+									cout << "Type Error"<< endl;
 								}
 								else 
 								{      
@@ -463,11 +433,11 @@ relational_expression: additive_expression      /* these are left associative */
 									
 									$$->falseList = makelist(nextInstr()+1);
 									
-									emit("<", "", $1->loc->name, $3->loc->name);     
+									emit("LESS_THAN", "", $1->loc->name, $3->loc->name);     
 
 									
 									
-									emit("goto", "");	
+									emit("GOTO", "");	
 
 									
 									
@@ -491,10 +461,10 @@ relational_expression: additive_expression      /* these are left associative */
 									
 									$$->falseList = makelist(nextInstr()+1);
 									
-									emit(">", "", $1->loc->name, $3->loc->name);
+									emit("GREATER_THAN", "", $1->loc->name, $3->loc->name);
 									
 									
-									emit("goto", "");
+									emit("GOTO", "");
 									
 									
 								}	
@@ -520,7 +490,7 @@ relational_expression: additive_expression      /* these are left associative */
 									emit("<=", "", $1->loc->name, $3->loc->name);
 									
 									
-									emit("goto", "");
+									emit("GOTO", "");
 									
 									
 								}		
@@ -543,10 +513,10 @@ relational_expression: additive_expression      /* these are left associative */
 									
 									$$->falseList = makelist(nextInstr()+1);
 									
-									emit(">=", "", $1->loc->name, $3->loc->name);
+									emit("GREATER_THAN_EQUAL_TO", "", $1->loc->name, $3->loc->name);
 									
 									
-									emit("goto", "");
+									emit("GOTO", "");
 									
 									
 								}
@@ -582,10 +552,10 @@ equality_expression: relational_expression      /* these are left associative */
 							
 							$$->falseList = makelist(nextInstr()+1); 
 							
-							emit("==", "", $1->loc->name, $3->loc->name);      
+							emit("EQUAL_TO", "", $1->loc->name, $3->loc->name);      
 
 							
-							emit("goto", "");				
+							emit("GOTO", "");				
 
 							
 							
@@ -615,10 +585,10 @@ equality_expression: relational_expression      /* these are left associative */
 							
 							$$->falseList = makelist(nextInstr()+1);
 							
-							emit("!=", "", $1->loc->name, $3->loc->name);
+							emit("NOT_EQUAL_TO", "", $1->loc->name, $3->loc->name);
 							
 							
-							emit("goto", "");
+							emit("GOTO", "");
 							
 							
 						}
@@ -702,20 +672,20 @@ conditional_expression: logical_OR_expression   /* these are right associative *
 							
 							$$->loc->update($5->loc->type);
 							
-							emit("=", $$->loc->name, $9->loc->name);      
+							emit("ASSIGN", $$->loc->name, $9->loc->name);      
 
 							
 							
 							list<int> l = makelist(nextInstr());        
 
-							emit("goto", "");              
+							emit("GOTO", "");              
 
 							
 							
 							backpatch($6->nextList, nextInstr());        
 
 							
-							emit("=", $$->loc->name, $5->loc->name);
+							emit("ASSIGN", $$->loc->name, $5->loc->name);
 							
 							
 							list<int> m = makelist(nextInstr());         
@@ -724,7 +694,7 @@ conditional_expression: logical_OR_expression   /* these are right associative *
 							l = merge(l, m);						
 
 							
-							emit("goto", "");						
+							emit("GOTO", "");						
 
 							
 							
@@ -756,7 +726,7 @@ assignment_expression: conditional_expression   /* these are right associative *
 
 								{
 									
-									$3->loc = convertType($3->loc, $1->aType);
+									$3->loc = convertType($3->loc, $1->type->type);
 									
 									emit("[]=", $1->Array->name, $1->loc->name, $3->loc->name);		
 									
@@ -774,7 +744,7 @@ assignment_expression: conditional_expression   /* these are right associative *
 								{
 									
 									$3->loc = convertType($3->loc, $1->Array->type->type);
-									emit("=", $1->Array->name, $3->loc->name);
+									emit("ASSIGN", $1->Array->name, $3->loc->name);
 									
 									
 								}
@@ -794,16 +764,20 @@ expression: assignment_expression
 
 /* ===================================== 2. Declarations =====================================*/
 
-declaration: type_specifier init_declarator SEMICOLON	{ }
+declaration: type_specifier init_declarator_list SEMICOLON	{ }
 			| type_specifier SEMICOLON   {       }
             ;
+
+init_declarator_list: init_declarator { }
+					| init_declarator_list COMMA init_declarator { }
+					;
 
 init_declarator: declarator {$$=$1;}
                 | declarator ASSIGN initializer 
                 {
 					if($3->val!="") $1->val=$3->val;        
 
-					emit("=", $1->name, $3->name);
+					emit("ASSIGN", $1->name, $3->name);
 					
 					
 				}
@@ -817,19 +791,10 @@ type_specifier: VOID    {var_type="void";}
 
 declarator: pointer direct_declarator 
 			{
-				
-				symbolType *t = $1;
-				
-				while(t->type!=NULL) t = t->type;           
-
-				
-				t->type = $2->type;                
-
-				
-				$$ = $2->update($1);                  
-
-				
-				
+				symbolType * t = $1;
+				while (t->ptr !=NULL) t = t->ptr;
+				t->ptr = $2->type;
+				$$ = $2->update($1);
 			}
         	| direct_declarator { }
             ;
@@ -840,8 +805,6 @@ direct_declarator: IDENTIFIER
 						$$ = $1->update(new symbolType(var_type));
 						
 						currentSymbol = $$;
-						
-						
 						
 					}
 					| direct_declarator L_SQUARE_BRACKET assignment_expression R_SQUARE_BRACKET 
@@ -854,7 +817,7 @@ direct_declarator: IDENTIFIER
 						while(t->type == "arr") 
 						{
 							prev = t;	
-							t = t->type;      
+							t = t->ptr;      
 
 							
 						}
@@ -862,11 +825,7 @@ direct_declarator: IDENTIFIER
 						{
 							
 							int temp = atoi($3->loc->val.c_str());      
-
-							
 							symbolType* s = new symbolType("arr", $1->type, temp);        
-
-							
 							$$ = $1->update(s);   
 
 							
@@ -875,9 +834,7 @@ direct_declarator: IDENTIFIER
 						else 
 						{
 							
-							prev->type =  new symbolType("arr", t, atoi($3->loc->val.c_str()));     
-
-							
+							prev->ptr =  new symbolType("arr", t, atoi($3->loc->val.c_str()));     							
 							$$ = $1->update($1->type);
 							
 							
@@ -893,7 +850,7 @@ direct_declarator: IDENTIFIER
 						while(t->type == "arr") 
 						{
 							prev = t;	
-							t = t->type;         
+							t = t->ptr;         
 
 							
 						}
@@ -910,7 +867,7 @@ direct_declarator: IDENTIFIER
 						else 
 						{
 							
-							prev->type =  new symbolType("arr", t, 0);
+							prev->ptr =  new symbolType("arr", t, 0);
 							
 							$$ = $1->update($1->type);
 							
@@ -923,7 +880,7 @@ direct_declarator: IDENTIFIER
 						
 						if($1->type->type !="void") 
 						{
-							sym *s = table->lookup("return");         
+							sym *s = table->lookup("RETURN");         
 
 							s->update($1->type);
 							
@@ -932,6 +889,7 @@ direct_declarator: IDENTIFIER
 						$1->nested=table;       
 							
 						table->parent = globalST;
+						$1->category = "function";
 						
 						changeTable(globalST);				
 
@@ -957,7 +915,7 @@ changetable: %empty
 					
 					changeTable(currentSymbol->nested);						
 					
-					emit("label", table->name);
+					emit("FUNC", table->name);
 					
 					
 				}
@@ -970,9 +928,9 @@ pointer: ASTERISK
 		
 		  
 	}
-	| pointer ASTERISK
+	| ASTERISK pointer
 	{
-		$$ = new symbolType("ptr", $1);
+		$$ = new symbolType("ptr", $2);
 		
 	}
         ;
@@ -985,15 +943,19 @@ parameter_list_opt: parameter_list          {	}
                     | %empty               {	}
                     ;
 
-parameter_declaration: type_specifier declarator   {	} 
+parameter_declaration: type_specifier declarator   { $2->category = "param";} 
+						| type_specifier { }
                          ;
 
 initializer: assignment_expression   { $$=$1->loc; }  
+			| L_CURLY_BRACKET initializer R_CURLY_BRACKET { }
+			| L_CURLY_BRACKET initializer COMMA R_CURLY_BRACKET { }
             ;
 
 /* ===================================== 3. Statements =====================================*/
 
-Statement: compound_statement 
+Statement: labeled_statement { }
+			| compound_statement 
                 {
                         $$ = $1;
                 }
@@ -1016,6 +978,12 @@ Statement: compound_statement
                         $$ = $1;
                 }   
             ;
+
+labeled_statement: IDENTIFIER COLON Statement  
+				{
+						$$ = $3;
+				}
+				;
 
 compound_statement: L_CURLY_BRACKET block_item_list_opt R_CURLY_BRACKET  
                 {
@@ -1115,16 +1083,15 @@ iteration_statement: FOR L_ROUND_BRACKET expression_statement M expression_state
 						backpatch($11->nextList, $6);	
 
 						
-						string str=convertToString($6);
 						
-						emit("goto", str);				
-
+						stringstream strStr;
+						strStr << $6;
+						string tempStr = strStr.str();
+						char* intStr = (char*) tempStr.c_str();
+						string str = string(intStr);
 						
-						
+						emit("GOTO", str);							
 						$$->nextList = $5->falseList;	
-
-						
-							
 					}
                     ;
 
@@ -1132,14 +1099,14 @@ jump_statement: RETURN expression SEMICOLON
 				{
 					$$ = new Statement();
 					
-					emit("return",$2->loc->name);  
+					emit("RETURN",$2->loc->name);  
 					
 				}
 				| RETURN SEMICOLON
 				{
 					$$ = new Statement();
 					
-					emit("return", "");
+					emit("RETURN", "");
 					
 				}
                 ;
@@ -1158,10 +1125,8 @@ external_declaration: function_definition       {   }
 function_definition: type_specifier declarator declaration_list_opt changetable compound_statement  
 					{
 						
-						int nextInstr=0;	 
-						
+						emit("end", table->name);
 						table->parent=globalST;
-						
 						changeTable(globalST);                    
 						
 						
@@ -1179,5 +1144,5 @@ declaration_list_opt: %empty {  }
 %%
 
 void yyerror(const char * s) {        
-		cout << "Error: " << s << endl;
+		cout << "Error (this one is generated using yyeror func): " << s << endl;
 }

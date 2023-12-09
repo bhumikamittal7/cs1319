@@ -43,6 +43,7 @@ INVALID_TOKEN           .
 "int"                           {return INT;}
 "return"                        {return RETURN;}
 "void"                          {return VOID;}
+"goto"                          {return GOTO;}
 
 
  /*edited here*/

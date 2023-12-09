@@ -1,0 +1,6 @@
+Changes to be made:
+    1. Flex is fine
+    2. Update Bison
+    3. Update header (almost done)
+    4. Update TAC file (try to keep same format though)
+    5. Update Target code generator
