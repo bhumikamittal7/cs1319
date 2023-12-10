@@ -14,8 +14,6 @@ void yyerror(const char *s);
 using namespace std;
 %}
 
-
-
 %define parse.error verbose
 /* ==================================== UNION =============================================== */
 

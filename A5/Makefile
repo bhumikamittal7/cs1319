@@ -2,19 +2,19 @@ TARGET = translator
 
 test: $(TARGET) io.a
 	./$(TARGET) 1 > test1.out
-	gcc -c 1_A5_quads1.asm
+	gcc -c test1.asm
 
 	./$(TARGET) 2 > test2.out
-	gcc -c 1_A5_quads2.asm
+	gcc -c test2.asm
 
 	./$(TARGET) 3 > test3.out
-	gcc -c 1_A5_quads3.asm
+	gcc -c test3.asm
 
 	./$(TARGET) 4 > test4.out
-	gcc -c 1_A5_quads4.asm
+	gcc -c test4.asm
 
 	./$(TARGET) 5 > test5.out
-	gcc -c 1_A5_quads5.asm
+	gcc -c test5.asm
 
 	gcc -L. -lio io.o -o test1
 	gcc -L. -lio io.o -o test2

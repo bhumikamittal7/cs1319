@@ -20,7 +20,7 @@ int labelCount = 0;				//count of labels
 std::map<int, int> labelMap;	//this is a map of label number to label count
 ofstream out;					// output file stream
 vector<quad> Array;				//vector of quads
-string asmfilename = "1_A5_quads";		//name of asm file - this is something I saw somewhere and it seems like a cool way to do it but probably doesn't work well
+string asmfilename = "test";		//name of asm file - this is something I saw somewhere and it seems like a cool way to do it but probably doesn't work well
 string inputfile = "test";			//name of input file
 /*====================================================================================================================================*/
 
