@@ -126,7 +126,7 @@ void quad::print()
 
 void quadArray::print()
 {
-	std::cout << setw(30) << setfill('=') << "=" << endl;
+	std::cout << setw(30) << setfill('-') << "-" << endl;
 	std::cout << "TAC" << endl;
 	std::cout << setw(30) << setfill('-') << "-" << setfill(' ') << endl;
 	for (vector<quad>::iterator it = Array.begin(); it != Array.end(); it++)
@@ -172,7 +172,7 @@ symTable::symTable(string name) : name(name), tempCount(0) {}
 void symTable::print()
 {
 	list<symTable *> tablelist;
-	std::cout << setw(120) << setfill('=') << "=" << endl;
+	std::cout << setw(120) << setfill('-') << "-" << endl;
 	std::cout << "Symbol Table: " << setfill(' ') << left << setw(50) << this->name;
 	std::cout << right << setw(25) << "Parent: ";
 	if (this->parent != NULL)
@@ -359,7 +359,7 @@ list<int> merge(list<int> &l1, list<int> &l2)
 Expression *convertInt2Bool(Expression *e)
 {
 
-	if (e->type != "BOOL")
+	if (e->type != "bool")
 	{
 		e->falseList = makelist(nextInstr());
 		emit("ASSIGN", "", e->loc->name, "0");
@@ -373,7 +373,7 @@ Expression *convertInt2Bool(Expression *e)
 Expression *convertBool2Int(Expression *e)
 {
 
-	if (e->type == "BOOL")
+	if (e->type == "bool")
 	{
 		e->loc = gentemp(new symbolType("int"));
 		backpatch(e->trueList, nextInstr());

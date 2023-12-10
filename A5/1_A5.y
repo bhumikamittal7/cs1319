@@ -1179,15 +1179,14 @@ external_declaration: function_definition       {   }
                     | declaration         {   }
                     ;
 
-function_definition: declaration_type declarator declaration_list changetable compound_statement  {}
-					|declaration_type declarator changetable compound_statement
+function_definition: type_specifier declarator declaration_list changetable compound_statement  {}
+					|type_specifier declarator changetable compound_statement
 					{
 						
 						emit("FUNCEND", table->name);
 						table->parent=globalST;
 						changeTable(globalST);                    
-						
-						
+
 					}
 					;
 

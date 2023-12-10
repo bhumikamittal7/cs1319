@@ -5,7 +5,7 @@ https://www.cs.virginia.edu/~evans/cs216/guides/x86.html
 https://www.cs.fsu.edu/~baker/opsys/notes/assembly.html
 https://docs.oracle.com/cd/E19253-01/817-5477/eoiyg/index.html
 */
-
+/*====================================================================================================================================*/
 #include "1_A5_translator.h"
 #include <iostream>
 #include <cstring>
@@ -15,13 +15,14 @@ extern FILE *yyin;
 extern vector<string> storeString;
 
 using namespace std;
-
-int labelCount = 0;
-std::map<int, int> labelMap;
-ofstream out;
-vector<quad> Array;
-string asmfilename = "test";
-string inputfile = "test";
+/*====================================================================================================================================*/
+int labelCount = 0;				//count of labels
+std::map<int, int> labelMap;	//this is a map of label number to label count
+ofstream out;					// output file stream
+vector<quad> Array;				//vector of quads
+string asmfilename = "1_A5_quads";		//name of asm file - this is something I saw somewhere and it seems like a cool way to do it but probably doesn't work well
+string inputfile = "test";			//name of input file
+/*====================================================================================================================================*/
 
 void ActivationRecord(symTable *st)
 {
@@ -36,7 +37,7 @@ void ActivationRecord(symTable *st)
 			st->array[it->name] = param;
 			param += it->size;
 		}
-		else if (it->name == "return")
+		else if (it->name == "RETURN")
 			continue;
 
 		else
@@ -46,6 +47,9 @@ void ActivationRecord(symTable *st)
 		}
 	}
 }
+/*====================================================================================================================================*/
+//this should be close to whatever -S is generating - fuck fully understanding this stuff for now - just try to replicate format as much as you can
+// can't be this hard, it's just mapping the code bruhhhhh!!!
 
 void generateASM()
 {
@@ -81,7 +85,7 @@ void generateASM()
 	ofstream asmfile;
 	asmfile.open(asmfilename.c_str());
 
-	asmfile << "\t.file	\"test.c\"\n";
+	asmfile << "\t.file	\"testASM.nc\"\n";
 	for (list<sym>::iterator it = table->table.begin(); it != table->table.end(); it++)
 	{
 		if (it->category != "function")
@@ -122,7 +126,7 @@ void generateASM()
 			}
 		}
 	}
-
+	//not reaching here?? probably some error in translator file ughh!
 	if (storeString.size())
 	{
 		asmfile << "\t.section\t.rodata\n";
@@ -347,11 +351,6 @@ void generateASM()
 				else
 					asmfile << "nop";
 			}
-			else if (op == "param")
-			{
-				params.push_back(result);
-			}
-
 			else if (op == "call")
 			{
 
@@ -475,10 +474,10 @@ void generateASM()
 			asmfile << endl;
 		}
 	}
-
-	asmfile << "\t.ident\t	\"Bhumika's Compiler LOL - please reach here\"\n";
+	asmfile << "\t.ident\t	\"Bhumika's Compiler LOL - pls pls reach here\"\n";
 	asmfile.close();
 }
+/*====================================================================================================================================*/
 
 template <class T>
 ostream &operator<<(ostream &os, const vector<T> &v)
@@ -486,17 +485,22 @@ ostream &operator<<(ostream &os, const vector<T> &v)
 	copy(v.begin(), v.end(), ostream_iterator<T>(os, " "));
 	return os;
 }
+/*====================================================================================================================================*/
 
 int main(int ac, char *av[])
 {
-	inputfile = inputfile + string(av[ac - 1]) + string(".nc");
-	asmfilename = asmfilename + string(av[ac - 1]) + string(".asm");
 	globalST = new symTable("Global");
 	table = globalST;
+
+	inputfile = inputfile + string(av[ac - 1]) + string(".nc");
+	asmfilename = asmfilename + string(av[ac - 1]) + string(".asm");
 	yyin = fopen(inputfile.c_str(), "r");
+	
 	yyparse();
+	q.print();
+	
 	globalST->update();
 	globalST->print();
-	q.print();
+
 	generateASM();
 }

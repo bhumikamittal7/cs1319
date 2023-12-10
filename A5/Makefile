@@ -2,30 +2,22 @@ TARGET = translator
 
 test: $(TARGET) io.a
 	./$(TARGET) 1 > test1.out
-	gcc -c test1.asm
-	gcc test1.o -o test1 -L. -lio
+	gcc -c 1_A5_quads1.asm
 
 	./$(TARGET) 2 > test2.out
-	gcc -c test2.asm
+	gcc -c 1_A5_quads2.asm
 
 	./$(TARGET) 3 > test3.out
-	gcc -c test3.asm
+	gcc -c 1_A5_quads3.asm
 
 	./$(TARGET) 4 > test4.out
-	gcc -c test4.asm
+	gcc -c 1_A5_quads4.asm
 
 	./$(TARGET) 5 > test5.out
-	gcc -c test5.asm
+	gcc -c 1_A5_quads5.asm
 
-	gcc test1.o -o test1 -L. -lio
-	gcc test2.o -o test2 -L. -lio
-	gcc test3.o -o test3 -L. -lio
-	gcc test4.o -o test4 -L. -lio
-	gcc test5.o -o test5 -L. -lio
-
-io.a : io.c
-	gcc -c io.c
-	ar -rcs io.a io.o
+	gcc -L. -lio io.o -o test1
+	gcc -L. -lio io.o -o test2
 
 $(TARGET): lex.yy.o 1_A5.tab.o 1_A5_translator.o 1_A5_target_translator.o
 	g++ lex.yy.o 1_A5.tab.o 1_A5_translator.o 1_A5_target_translator.o -ll -o $(TARGET) -Werror
@@ -49,8 +41,12 @@ lex.yy.c: 1_A5.l 1_A5.tab.h 1_A5_translator.h
 1_A5.tab.c 1_A5.tab.h: 1_A5.y
 	bison -d 1_A5.y
 
+io.a : io.c
+	gcc -c io.c
+	ar -rcs io.a io.o
+
 clean:
-	rm lex.yy.c 1_A5.tab.c 1_A5.tab.h lex.yy.o 1_A5.tab.o 1_A5_translator.o $(TARGET) 1_A5_translator.h.gch 1_A5_target_translator.o test1.out test2.out test3.out test4.out test5.out test1.asm test2.asm test3.asm test4.asm test5.asm
+	rm lex.yy.c 1_A5.tab.c 1_A5.tab.h lex.yy.o 1_A5.tab.o 1_A5_translator.o $(TARGET) 1_A5_translator.h.gch 1_A5_target_translator.o io.a io.o
 
 build: test
 

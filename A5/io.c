@@ -12,7 +12,7 @@ int printStr(char *inputString)
     int length = 0;
     for (length = 0; inputString[length] != '\0'; length++)
         ;
-    __asm__ __volatile__("syscall" ::"a"(1), "D"(1), "S"(inputString), "d"(length));    // syscall for write (syntax: syscall, syscall number, destination, source, length)
+    __asm__ __volatile__("syscall" ::"a"(1), "D"(1), "S"(inputString), "d"(length)); // syscall for write (syntax: syscall, syscall number, destination, source, length)
     return length;
 }
 
