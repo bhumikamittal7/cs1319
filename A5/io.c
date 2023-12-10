@@ -7,7 +7,7 @@ https://github.com/bhumikamittal7/cs1217/blob/master/lab2/printf.c  (puttig this
 
  */
 
-int printString(char *inputString)
+int printStr(char *inputString)
 {
     int length = 0;
     for (length = 0; inputString[length] != '\0'; length++)
@@ -16,7 +16,7 @@ int printString(char *inputString)
     return length;
 }
 
-int printInteger(int number)
+int printInt(int number)
 {
     char buffer[100];
     int index = 0, j, k, bytes;
@@ -67,7 +67,7 @@ int printInteger(int number)
     return bytes;
 }
 
-int readInteger(int *errorPointer)
+int readInt(int *eP)
 {
     char buffer[1];
     char digits[20];
@@ -81,7 +81,7 @@ int readInteger(int *errorPointer)
             break;
 
         else if (((int)buffer[0] - '0' > 9 || (int)buffer[0] - '0' < 0) && buffer[0] != '-')
-            *errorPointer = 1;
+            *eP = 1;
 
         else
             digits[length++] = buffer[0];
@@ -89,7 +89,7 @@ int readInteger(int *errorPointer)
 
     if (length > 9 || length == 0)
     {
-        *errorPointer = 1;
+        *eP = 1;
         return 0;
     }
 
@@ -97,14 +97,14 @@ int readInteger(int *errorPointer)
     {
         if (length == 1)
         {
-            *errorPointer = 1;
+            *eP = 1;
             return 0;
         }
 
         for (i = 1; i < length; i++)
         {
             if (digits[i] == '-')
-                *errorPointer = 1;
+                *eP = 1;
             num *= 10;
             num += (int)digits[i] - '0';
         }
@@ -116,7 +116,7 @@ int readInteger(int *errorPointer)
         for (i = 0; i < length; i++)
         {
             if (digits[i] == '-')
-                *errorPointer = 1;
+                *eP = 1;
             num *= 10;
             num += (int)digits[i] - '0';
         }

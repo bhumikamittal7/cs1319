@@ -197,8 +197,8 @@ postfix_expression: primary_expression
 							string str1 = string(intStr1);
 							emit("*", $$->loc->name, $3->loc->name, str1);
 						}
-					$$->aType = "arr";
-	        }
+						$$->aType = "arr";
+	        		}
                     | postfix_expression L_ROUND_BRACKET argument_expression_list R_ROUND_BRACKET
                     {
                         $$=new Array();	
@@ -213,6 +213,19 @@ postfix_expression: primary_expression
                         
                     }
                     | postfix_expression ARROW IDENTIFIER {  }/* pointer indirection only one level */
+					| postfix_expression L_SQUARE_BRACKET  R_SQUARE_BRACKET  {}
+					| L_ROUND_BRACKET specifier_list R_ROUND_BRACKET L_CURLY_BRACKET initializer_list R_CURLY_BRACKET
+						{
+							$$ = new Array();
+							$$->Array = gentemp(new symbolType("int"));
+							$$->loc = gentemp(new symbolType("int"));
+						}
+					| L_ROUND_BRACKET specifier_list R_ROUND_BRACKET L_CURLY_BRACKET initializer_list COMMA R_CURLY_BRACKET
+						{
+							$$ = new Array();
+							$$->Array = gentemp(new symbolType("int"));
+							$$->loc = gentemp(new symbolType("int"));
+						}
                     ;
 
 argument_expression_list: assignment_expression
@@ -764,9 +777,14 @@ expression: assignment_expression
 
 /* ===================================== 2. Declarations =====================================*/
 
-declaration: type_specifier init_declarator_list SEMICOLON	{ }
-			| type_specifier SEMICOLON   {       }
+declaration: declaration_type init_declarator_list SEMICOLON	{ }
+			| declaration_type SEMICOLON   {       }
             ;
+
+declaration_type:
+	type_specifier declaration_type {}
+	|type_specifier {}
+	;
 
 init_declarator_list: init_declarator { }
 					| init_declarator_list COMMA init_declarator { }
@@ -786,7 +804,6 @@ init_declarator: declarator {$$=$1;}
 type_specifier: VOID    {var_type="void";}
                 | CHAR  { var_type="char"; }
                 | INT   { var_type="int"; }
-
                 ;
 
 declarator: pointer direct_declarator 
@@ -874,7 +891,7 @@ direct_declarator: IDENTIFIER
 							
 						}
 					}
-					| direct_declarator L_ROUND_BRACKET changetable parameter_list_opt R_ROUND_BRACKET  
+					| direct_declarator L_ROUND_BRACKET changetable parameter_list R_ROUND_BRACKET  
 					{
 						table->name = $1->name;
 						
@@ -899,6 +916,32 @@ direct_declarator: IDENTIFIER
 						
 					}
 					| L_ROUND_BRACKET declarator R_ROUND_BRACKET { $$ = $2; }
+					| direct_declarator L_SQUARE_BRACKET ASTERISK R_SQUARE_BRACKET {}
+					| direct_declarator L_SQUARE_BRACKET identifier_list R_SQUARE_BRACKET {}
+					| direct_declarator L_ROUND_BRACKET changetable R_ROUND_BRACKET  
+					{
+						table->name = $1->name;
+						
+						if($1->type->type !="void") 
+						{
+							sym *s = table->lookup("RETURN");         
+
+							s->update($1->type);
+							
+							
+						}
+						$1->nested=table;       
+							
+						table->parent = globalST;
+						$1->category = "function";
+						
+						changeTable(globalST);				
+
+						
+						currentSymbol = $$;
+						
+						
+					}
                     ;
 
 changetable: %empty 
@@ -939,18 +982,32 @@ parameter_list: parameter_declaration           {       }
                 | parameter_list COMMA parameter_declaration {  }
                 ;
 
-parameter_list_opt: parameter_list          {	}
-                    | %empty               {	}
-                    ;
-
-parameter_declaration: type_specifier declarator   { $2->category = "param";} 
-						| type_specifier { }
+parameter_declaration: declaration_type declarator   { $2->category = "param";} 
+						| declaration_type { }
                          ;
 
+identifier_list:	IDENTIFIER	{ }
+				| identifier_list COMMA IDENTIFIER {}
+				;
+
 initializer: assignment_expression   { $$=$1->loc; }  
-			| L_CURLY_BRACKET initializer R_CURLY_BRACKET { }
-			| L_CURLY_BRACKET initializer COMMA R_CURLY_BRACKET { }
+			| L_CURLY_BRACKET initializer_list R_CURLY_BRACKET { }
+			| L_CURLY_BRACKET initializer_list COMMA R_CURLY_BRACKET { }
             ;
+
+initializer_list: initializer_list COMMA designation initializer {}
+				|  designation initializer {}
+				| initializer {}
+				| initializer_list COMMA initializer {}
+				;
+
+specifier_list:	type_specifier {}
+				| type_specifier specifier_list{}
+				;
+
+designation: L_SQUARE_BRACKET conditional_expression R_SQUARE_BRACKET ASSIGN {}
+			| designation L_SQUARE_BRACKET conditional_expression R_SQUARE_BRACKET ASSIGN {}
+			;
 
 /* ===================================== 3. Statements =====================================*/
 
@@ -981,7 +1038,7 @@ Statement: labeled_statement { }
 
 labeled_statement: IDENTIFIER COLON Statement  
 				{
-						$$ = $3;
+						$$ = new Statement();
 				}
 				;
 
@@ -1122,8 +1179,8 @@ external_declaration: function_definition       {   }
                     | declaration         {   }
                     ;
 
-function_definition: type_specifier declarator declaration_list changetable compound_statement  {}
-					|type_specifier declarator changetable compound_statement
+function_definition: declaration_type declarator declaration_list changetable compound_statement  {}
+					|declaration_type declarator changetable compound_statement
 					{
 						
 						emit("FUNCEND", table->name);

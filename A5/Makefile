@@ -1,8 +1,9 @@
 TARGET = translator
 
-test: $(TARGET)
+test: $(TARGET) io.a
 	./$(TARGET) 1 > test1.out
 	gcc -c test1.asm
+	gcc test1.o -o test1 -L. -lio
 
 	./$(TARGET) 2 > test2.out
 	gcc -c test2.asm
